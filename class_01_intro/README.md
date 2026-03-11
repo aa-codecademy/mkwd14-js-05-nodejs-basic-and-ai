@@ -56,6 +56,39 @@ flowchart LR
 - Terminal basics (`cd`, `ls`, `node`)
 - VS Code installed
 
+## Setup & Installation
+
+### Install Node.js locally
+
+1. Go to [nodejs.org](https://nodejs.org/) and download the **LTS** version for your OS.
+2. Run the installer and follow the steps (default options are fine). When offered, select/check **Chocolatey** so you can manage Node and other tools from the command line later.
+3. Restart the terminal (or VS Code) after installation.
+
+### Check Node.js and npm versions
+
+```bash
+node -v
+npm -v
+```
+
+You should see version numbers (e.g. `v20.x.x` and `10.x.x`). If you get "command not found" or similar, Node.js is not on your PATH or not installed.
+
+### Initialize a new project
+
+- **Interactive** (prompts for name, version, description, etc.):
+
+  ```bash
+  npm init
+  ```
+
+- **Non-interactive** (creates `package.json` with defaults; use `-y` or `--yes`):
+
+  ```bash
+  npm init -y
+  ```
+
+Use `npm init -y` when you want a quick scaffold; use `npm init` when you want to set name, version, or other fields up front.
+
 ## Run The Examples
 
 ### 1) CommonJS example (example1)
@@ -81,6 +114,14 @@ node index.js
 - Why splitting logic by responsibility improves maintainability
 
 ## Debugging Checklist
+
+- **PowerShell: scripts disabled** — If you see an execution policy error on Windows, open PowerShell as Administrator and run:
+
+  ```powershell
+  Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
+
+  Then try your command again.
 
 - `Cannot find module ...` -> check relative import path
 - `Unexpected token import` -> verify module system and `package.json`
