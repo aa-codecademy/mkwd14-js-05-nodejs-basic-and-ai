@@ -12,14 +12,17 @@ Repository for learning **Web API Development** with Node.js and AI. Focus on bu
 | **Trainer** | Ivo Kostovski |
 | **Email** | [ivo@kostovski.dev](mailto:ivo@kostovski.dev) |
 | **Web** | [kostovski.dev](https://kostovski.dev) |
+| **GitHub** | [ivokostovski](https://github.com/ivokostovski) |
 
 ---
 
 ## 📚 Topics
 
 - **Node.js** — runtime, modules, event loop
+- **Built-in modules** — path, fs (filesystem), etc.
 - **Backend API development** — REST, HTTP, JSON
 - **Express** — routing, middleware, error handling
+- **MongoDB & Mongoose** — database, ODM, schemas
 - **Events** — EventEmitter, streams, async patterns
 - **Authentication & authorization** — strategies, roles, JWT
 - **Sessions & cookies** — state, security, storage
