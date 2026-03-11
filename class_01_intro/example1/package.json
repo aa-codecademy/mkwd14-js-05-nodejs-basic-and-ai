@@ -1,0 +1,13 @@
+{
+	"name": "example1",
+	"version": "1.0.0",
+	"description": "first example of creating a nodejs app",
+	"license": "ISC",
+	"author": "Ivo Kostovski",
+	"type": "commonjs",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node index.js"
+	}
+}
