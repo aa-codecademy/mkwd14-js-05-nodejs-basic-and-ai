@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import os from 'os';
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,3 +50,11 @@ fs.appendFileSync(testFilePath, '\nG2 students say hi!');
 
 const fileText = fs.readFileSync(testFilePath, 'utf-8');
 console.log('Text content from test.txt: ', fileText);
+
+// UUID examples
+const firstID = uuidv4();
+console.log('First generated UUID: ', firstID);
+// Example for the structure of the UUID: 18700133-5903-4360-a5ef-fe1da41daab8
+
+const secondID = uuidv4();
+console.log('Second generated UUID: ', secondID);
