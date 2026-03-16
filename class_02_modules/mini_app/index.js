@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import readline from 'readline/promises';
 import { stdin, stdout } from 'process';
+import * as taskManager from './task-manager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +23,20 @@ function showMenu() {
 async function addTask() {
 	const title = await rl.question('\nTask title: ');
 	const description = await rl.question('\nTask description: ');
-	console.log(title, description);
+	taskManager.addTask(title, description);
+}
+
+function readTasks() {
+	console.log(
+		'Here is a full list of the currently available tasks: \n',
+		taskManager.readTasks(),
+	);
+}
+
+async function getTaskById() {
+	const id = await rl.question('\nTask ID: ');
+	const task = taskManager.getTaskById(id);
+	console.log('The task: \n', task);
 }
 
 async function main() {
@@ -35,10 +49,10 @@ async function main() {
 			await addTask();
 			break;
 		case '2':
-			console.log('Not yet implemented. Try again later.');
+			readTasks();
 			break;
 		case '3':
-			console.log('Not yet implemented. Try again later.');
+			await getTaskById();
 			break;
 		case '4':
 			console.log('Not yet implemented. Try again later.');
