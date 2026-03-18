@@ -13,8 +13,7 @@ You **must** use a **new GitHub repository** for all Node.js homeworks (one repo
 1. Go to [github.com/new](https://github.com/new).
 2. Choose a name (e.g. `nodejs-homeworks`).
 3. Set visibility to **Private** (recommended) so only you and the trainer can see it.
-4. Do **not** initialize with a README if you already have local code.
-5. Click **Create repository**.
+4. Click **Create repository**.
 
 ### 2. Make the repo private (if you didn’t in step 1)
 
