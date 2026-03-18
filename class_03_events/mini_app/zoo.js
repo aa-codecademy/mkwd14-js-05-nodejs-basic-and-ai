@@ -1,11 +1,12 @@
 import { EventEmitter } from 'events';
 
-
+// Zoo is the event hub: animals emit on the zoo, and the zoo has listeners for each action type
 export default class Zoo extends EventEmitter {
 	constructor() {
-		super();
+		super(); // required when extending EventEmitter
 		this.animals = [];
 
+		// Register listeners: when an animal does doAction('roar'), zoo emits 'animal:roar' and this runs
 		this.on('animal:roar', animal => {
 			console.log(
 				`🦁 Zoo Alert: ${animal.name} is roaring! Other animals are getting scared!`,
@@ -25,9 +26,10 @@ export default class Zoo extends EventEmitter {
 		});
 	}
 
+	// When we add an animal, we give it a reference to this zoo so it can call this.zoo.emit(...)
 	addAnimal(animal) {
 		this.animals.push(animal);
-		animal.setZoo(this); // this is referencing the initiated zoo that is added the animal been added to the zoo
+		animal.setZoo(this);
 		console.log(`${animal.name} has been added to the zoo!`);
 	}
 }

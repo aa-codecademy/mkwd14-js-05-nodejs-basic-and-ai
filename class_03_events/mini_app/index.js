@@ -8,16 +8,15 @@ const dumbo = new Animal('Dumbo the Elephant');
 const mike = new Animal('Mike the Monkey');
 const dan = new Animal('Dan the Horse');
 
+// addAnimal also calls animal.setZoo(myZoo) so each animal can emit events on the zoo
 myZoo.addAnimal(leo);
 myZoo.addAnimal(dumbo);
 myZoo.addAnimal(mike);
 myZoo.addAnimal(dan);
 
-// leo.doAction('sleep');
-// dumbo.doAction('sleep');
-// mike.doAction('sleep');
-// dan.doAction('sleep');
+// Manual trigger (commented out): leo.doAction('sleep'); etc.
 
+// Demo: every 2 seconds pick a random animal and random action; the zoo's listeners will log the result
 const animals = [leo, dumbo, mike, dan];
 const actions = ['sleep', 'eat', 'roar', 'play'];
 

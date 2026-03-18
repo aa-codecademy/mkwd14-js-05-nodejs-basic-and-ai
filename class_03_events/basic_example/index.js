@@ -1,25 +1,25 @@
 import { EventEmitter } from 'events';
 
-// Custom event emitter
+// EventEmitter: "publish–subscribe" pattern. Someone emits an event name + data; listeners run when that name is emitted.
 class MyEmitter extends EventEmitter {}
 
-// Initialize instance of the event emitter
 const myEmitter = new MyEmitter();
 
-// Listening to an event
+// on('eventName', callback): run callback every time the event is emitted
 myEmitter.on('greet', name => {
 	console.log(`Hello, ${name}`);
 });
 
-// Listening to an event only once
+// once('eventName', callback): run callback only the first time the event is emitted, then remove listener
 myEmitter.once('welcome', name => {
 	console.log(`Welcome to our Application, ${name}!`);
 });
 
-// Emitting an event
+// emit('eventName', ...args): trigger the event; all registered listeners get the extra arguments
 myEmitter.emit('greet', 'Ivo');
 myEmitter.emit('greet', 'Ivan');
 myEmitter.emit('greet', 'Martin');
 
+// 'welcome' runs only for the first emit; second emit does nothing for once()
 myEmitter.emit('welcome', 'Ivo');
 myEmitter.emit('welcome', 'Ivan');

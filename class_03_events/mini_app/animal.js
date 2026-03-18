@@ -1,13 +1,15 @@
+// Animal doesn't extend EventEmitter; it notifies the zoo by emitting on the zoo instance
 export default class Animal {
 	constructor(name) {
 		this.name = name;
-		this.zoo = null;
+		this.zoo = null; // set when added to a zoo via addAnimal()
 	}
 
 	setZoo(zoo) {
 		this.zoo = zoo;
 	}
 
+	// Animal tells the zoo "I'm doing this action"; zoo listens for events like animal:roar, animal:eat, etc.
 	doAction(action) {
 		if (!this.zoo) {
 			console.log(
@@ -16,10 +18,7 @@ export default class Animal {
 			return;
 		}
 
-		// animal:roar
-		// animal:eat
-		// animal:sleep
-		// animal:play
-		this.zoo.emit(`animal:${action}`, this); // this is referencing the animal that is doing the action
+		// Emit on the zoo (which extends EventEmitter); pass this so the zoo knows which animal acted
+		this.zoo.emit(`animal:${action}`, this);
 	}
 }

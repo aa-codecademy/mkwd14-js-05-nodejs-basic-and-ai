@@ -6,17 +6,21 @@ import { v4 as uuidv4 } from 'uuid';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// All tasks are stored in one JSON file next to this script
 const tasksFilePath = path.join(__dirname, 'tasks.json');
 
+// Helper: save the full tasks array to disk (null, 2 = pretty-print with 2-space indent)
 function writeToTasksFile(tasks) {
 	fs.writeFileSync(tasksFilePath, JSON.stringify(tasks, null, 2));
 }
 
+// Helper: load tasks from disk; parse JSON string into JavaScript array
 function readFromTasksFile() {
 	const tasks = fs.readFileSync(tasksFilePath, 'utf-8');
 	return JSON.parse(tasks);
 }
 
+// Create: add a new task with a unique id and timestamp, then persist to file
 export function addTask(title, description) {
 	const newTask = {
 		id: uuidv4(),
@@ -31,40 +35,29 @@ export function addTask(title, description) {
 	writeToTasksFile(tasks);
 }
 
+// Read all tasks
 export function readTasks() {
 	return readFromTasksFile();
 }
 
+// Read one task by id; find() returns undefined if no match
 export function getTaskById(id) {
 	const tasks = readFromTasksFile();
 
 	return tasks.find(task => task.id === id);
 }
 
-// Using find Index
+// Alternative: update using findIndex (find position, then mutate that element)
 // export function markTaskAsCompleted(id) {
-// 	// Get all tasks from the DB (json file)
 // 	const tasks = readFromTasksFile();
-
-// 	// Get the task location by id
 // 	const taskIndex = tasks.findIndex(task => task.id === id);
-
-// 	// Update the task in the array
-// 	tasks[taskIndex] = {
-// 		...tasks[taskIndex],
-// 		completed: true,
-// 	};
-
-// 	// Save the tasks to the JSON file
+// 	tasks[taskIndex] = { ...tasks[taskIndex], completed: true };
 // 	writeToTasksFile(tasks);
-
-// 	// return the updated task
 // 	return tasks[taskIndex];
 // }
 
-// Updating task using map
+// Update: mark one task as completed using map — build new array, flip completed for matching id
 export function markTaskAsCompleted(id) {
-	// Get all tasks from the DB (json file)
 	const tasks = readFromTasksFile();
 
 	const updatedTasks = tasks.map(task => {
@@ -74,17 +67,13 @@ export function markTaskAsCompleted(id) {
 		return task;
 	});
 
-	// Save the tasks to the JSON file
 	writeToTasksFile(updatedTasks);
-
-	// return the updated task
 	return updatedTasks.find(t => t.id === id);
 }
 
+// Delete: keep only tasks whose id is not the one to delete; filter returns new array
 export function deleteTask(id) {
 	const tasks = readFromTasksFile();
-
 	const updatedTasks = tasks.filter(t => t.id !== id);
-
 	writeToTasksFile(updatedTasks);
 }

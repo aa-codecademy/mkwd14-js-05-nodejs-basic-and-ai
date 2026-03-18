@@ -7,6 +7,7 @@ import * as taskManager from './task-manager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// readline/promises gives us async question(); we read from stdin and write to stdout
 const rl = readline.createInterface({ input: stdin, output: stdout });
 
 function showMenu() {
@@ -19,6 +20,7 @@ function showMenu() {
 	console.log('6. Exit');
 }
 
+// Each menu action is a separate async function so we can await rl.question()
 async function addTask() {
 	const title = await rl.question('\nTask title: ');
 	const description = await rl.question('\nTask description: ');
@@ -52,6 +54,7 @@ async function deleteTask() {
 	console.log('Successfully deleted the task!');
 }
 
+// Main loop: show menu, get user choice, run the matching action; repeat until exit
 async function main() {
 	console.log('Welcome to the Task Manager App!');
 	try {
@@ -76,25 +79,23 @@ async function main() {
 					break;
 				case '6':
 					rl.close();
-					process.exit(0); // successful exit
+					process.exit(0); // 0 = success; non-zero = error
 					break;
 				default:
 					console.log(`Such option doesn't exist. Try using options 1-6.`);
 			}
 		}
 	} catch (error) {
+		// When user exits with Ctrl+C or we close rl, question() can throw; we ignore that specific error
 		if (error.code !== 'ERR_USE_AFTER_CLOSE') {
 			console.error('Something went wrong. Please try again later.');
 
 			rl.close();
-			process.exit(1); // unsuccessful exit
+			process.exit(1);
 		}
 	}
 }
 
 main();
 
-// C - Create;
-// R - Read;
-// U - Update;
-// D - Delete;
+// This app demonstrates CRUD: Create, Read, Update, Delete
