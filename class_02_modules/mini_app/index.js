@@ -26,9 +26,10 @@ async function addTask() {
 }
 
 function readTasks() {
+	const tasks = taskManager.readTasks();
 	console.log(
-		'Here is a full list of the currently available tasks: \n',
-		taskManager.readTasks(),
+		`Here is a full list of the ${tasks.length} tasks, currently available in the system: \n`,
+		tasks,
 	);
 }
 
@@ -52,31 +53,42 @@ async function deleteTask() {
 }
 
 async function main() {
-	showMenu();
-	const answer = await rl.question('\nOption: ');
-	console.log('Answer is: ', answer);
+	console.log('Welcome to the Task Manager App!');
+	try {
+		while (true) {
+			showMenu();
+			const answer = await rl.question('\nOption: ');
+			switch (answer) {
+				case '1':
+					await addTask();
+					break;
+				case '2':
+					readTasks();
+					break;
+				case '3':
+					await getTaskById();
+					break;
+				case '4':
+					await markTaskAsCompleted();
+					break;
+				case '5':
+					await deleteTask();
+					break;
+				case '6':
+					rl.close();
+					process.exit(0); // successful exit
+					break;
+				default:
+					console.log(`Such option doesn't exist. Try using options 1-6.`);
+			}
+		}
+	} catch (error) {
+		if (error.code !== 'ERR_USE_AFTER_CLOSE') {
+			console.error('Something went wrong. Please try again later.');
 
-	switch (answer) {
-		case '1':
-			await addTask();
-			break;
-		case '2':
-			readTasks();
-			break;
-		case '3':
-			await getTaskById();
-			break;
-		case '4':
-			await markTaskAsCompleted();
-			break;
-		case '5':
-			await deleteTask();
-			break;
-		case '6':
-			console.log('Not yet implemented. Try again later.');
-			break;
-		default:
-			console.log(`Such option doesn't exist. Try using options 1-6.`);
+			rl.close();
+			process.exit(1); // unsuccessful exit
+		}
 	}
 }
 
