@@ -1,16 +1,1 @@
-[
-  {
-    "id": "d8c30f83-6a6e-4ab2-8721-b6760a3ced07",
-    "title": "Homework 1",
-    "description": "Node js homework for modules",
-    "completed": false,
-    "createdAt": "2026-03-16T19:40:03.441Z"
-  },
-  {
-    "id": "14fa93af-97bc-4536-b952-ab9471f16a92",
-    "title": "Homework 2",
-    "description": "HTML CSS Homework, layout page",
-    "completed": false,
-    "createdAt": "2026-03-16T19:47:24.569Z"
-  }
-]
+[]

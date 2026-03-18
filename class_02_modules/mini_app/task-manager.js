@@ -40,3 +40,51 @@ export function getTaskById(id) {
 
 	return tasks.find(task => task.id === id);
 }
+
+// Using find Index
+// export function markTaskAsCompleted(id) {
+// 	// Get all tasks from the DB (json file)
+// 	const tasks = readFromTasksFile();
+
+// 	// Get the task location by id
+// 	const taskIndex = tasks.findIndex(task => task.id === id);
+
+// 	// Update the task in the array
+// 	tasks[taskIndex] = {
+// 		...tasks[taskIndex],
+// 		completed: true,
+// 	};
+
+// 	// Save the tasks to the JSON file
+// 	writeToTasksFile(tasks);
+
+// 	// return the updated task
+// 	return tasks[taskIndex];
+// }
+
+// Updating task using map
+export function markTaskAsCompleted(id) {
+	// Get all tasks from the DB (json file)
+	const tasks = readFromTasksFile();
+
+	const updatedTasks = tasks.map(task => {
+		if (task.id === id) {
+			task.completed = true;
+		}
+		return task;
+	});
+
+	// Save the tasks to the JSON file
+	writeToTasksFile(updatedTasks);
+
+	// return the updated task
+	return updatedTasks.find(t => t.id === id);
+}
+
+export function deleteTask(id) {
+	const tasks = readFromTasksFile();
+
+	const updatedTasks = tasks.filter(t => t.id !== id);
+
+	writeToTasksFile(updatedTasks);
+}

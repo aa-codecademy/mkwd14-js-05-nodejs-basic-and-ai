@@ -1,6 +1,5 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
 import readline from 'readline/promises';
 import { stdin, stdout } from 'process';
 import * as taskManager from './task-manager.js';
@@ -15,7 +14,7 @@ function showMenu() {
 	console.log('1. Add task');
 	console.log('2. List all tasks');
 	console.log('3. Get task by ID');
-	console.log('4. Update task');
+	console.log('4. Mark task as completed');
 	console.log('5. Delete task');
 	console.log('6. Exit');
 }
@@ -39,6 +38,19 @@ async function getTaskById() {
 	console.log('The task: \n', task);
 }
 
+async function markTaskAsCompleted() {
+	const id = await rl.question('\nTask ID: ');
+	const updatedTask = taskManager.markTaskAsCompleted(id);
+
+	console.log('Updated task: ', updatedTask);
+}
+
+async function deleteTask() {
+	const id = await rl.question('\nTask ID: ');
+	taskManager.deleteTask(id);
+	console.log('Successfully deleted the task!');
+}
+
 async function main() {
 	showMenu();
 	const answer = await rl.question('\nOption: ');
@@ -55,10 +67,10 @@ async function main() {
 			await getTaskById();
 			break;
 		case '4':
-			console.log('Not yet implemented. Try again later.');
+			await markTaskAsCompleted();
 			break;
 		case '5':
-			console.log('Not yet implemented. Try again later.');
+			await deleteTask();
 			break;
 		case '6':
 			console.log('Not yet implemented. Try again later.');
