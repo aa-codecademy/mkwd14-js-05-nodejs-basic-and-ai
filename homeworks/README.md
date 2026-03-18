@@ -40,8 +40,6 @@ You **must** use a **new GitHub repository** for all Node.js homeworks (one repo
 Each homework is a **separate README** in this folder:
 
 - `README.md` — this file (overview and submission rules)
-- `homework-01.md` — (to be added)
-- `homework-02.md` — (to be added)
-- …
+- [**Homework: CLI “Guess the Number” game**](./homework-class-02-game.md) — after Class 02 (modules, `fs`, `readline`, JSON); optional **EventEmitter** bonus
 
 Check back as new assignments are added.
