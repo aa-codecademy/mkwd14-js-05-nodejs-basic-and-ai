@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Products</h1>
+
+      <!-- Add Product Form -->
+      <section class="card">
+        <h2>Add Product</h2>
+        <form id="add-form">
+          <div class="form-row">
+            <input
+              type="text"
+              id="add-name"
+              placeholder="Name"
+              required
+            />
+            <input
+              type="number"
+              id="add-price"
+              placeholder="Price"
+              step="0.01"
+              min="0"
+              required
+            />
+            <label class="checkbox-label">
+              <input type="checkbox" id="add-inStock" />
+              In Stock
+            </label>
+            <button type="submit">Add Product</button>
+          </div>
+        </form>
+        <p id="error-msg" class="error hidden"></p>
+      </section>
+
+      <!-- Products Table -->
+      <section class="card">
+        <h2>All Products</h2>
+        <table id="products-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Price</th>
+              <th>In Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-body">
+            <tr>
+              <td colspan="4" class="empty">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-overlay" class="overlay hidden">
+      <div class="modal">
+        <h2>Edit Product</h2>
+        <form id="edit-form">
+          <input type="hidden" id="edit-id" />
+          <div class="form-col">
+            <label>Name
+              <input type="text" id="edit-name" required />
+            </label>
+            <label>Price
+              <input type="number" id="edit-price" step="0.01" min="0" required />
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="edit-inStock" />
+              In Stock
+            </label>
+          </div>
+          <p id="edit-error-msg" class="error hidden"></p>
+          <div class="modal-actions">
+            <button type="submit">Save</button>
+            <button type="button" id="cancel-edit">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

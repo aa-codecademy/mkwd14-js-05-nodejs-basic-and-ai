@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1774464483249,
+    "createdAt": "2026-03-25T18:48:03.249Z",
+    "name": "TV",
+    "price": 3000,
+    "inStock": false
+  },
+  {
+    "id": 1774466873481,
+    "name": "MX Keys",
+    "price": 100,
+    "inStock": true,
+    "createdAt": "2026-03-25T19:27:53.481Z"
+  }
+]
