@@ -2,25 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Makes the page responsive on mobile by matching the viewport width -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Products</title>
+    <!-- External stylesheet – keeps presentation separate from structure -->
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
       <h1>Products</h1>
 
-      <!-- Add Product Form -->
+      <!-- ── Add Product Form ─────────────────────────────────────────────
+           Submitting this form triggers the addForm "submit" listener in app.js,
+           which POSTs the data to POST /api/products.
+           The "required" attributes on the inputs provide basic browser-level
+           validation before any JS runs.
+      ──────────────────────────────────────────────────────────────────── -->
       <section class="card">
         <h2>Add Product</h2>
         <form id="add-form">
           <div class="form-row">
+            <!-- Text input for the product name -->
             <input
               type="text"
               id="add-name"
               placeholder="Name"
               required
             />
+            <!-- Number input – step="0.01" allows cents; min="0" prevents negatives -->
             <input
               type="number"
               id="add-price"
@@ -29,6 +38,7 @@
               min="0"
               required
             />
+            <!-- Checkbox: checked = true (in stock), unchecked = false -->
             <label class="checkbox-label">
               <input type="checkbox" id="add-inStock" />
               In Stock
@@ -36,10 +46,15 @@
             <button type="submit">Add Product</button>
           </div>
         </form>
+        <!-- Error paragraph – hidden by default, shown by showError() in app.js -->
         <p id="error-msg" class="error hidden"></p>
       </section>
 
-      <!-- Products Table -->
+      <!-- ── Products Table ──────────────────────────────────────────────
+           The <thead> is static HTML; the <tbody> is populated dynamically
+           by renderProducts() in app.js after fetchProducts() completes.
+           "Loading…" is the initial placeholder shown before the first fetch.
+      ──────────────────────────────────────────────────────────────────── -->
       <section class="card">
         <h2>All Products</h2>
         <table id="products-table">
@@ -48,10 +63,11 @@
               <th>Name</th>
               <th>Price</th>
               <th>In Stock</th>
-              <th>Actions</th>
+              <th>Actions</th>  <!-- Edit / Delete buttons injected by app.js -->
             </tr>
           </thead>
           <tbody id="products-body">
+            <!-- Placeholder row until app.js replaces it with real data -->
             <tr>
               <td colspan="4" class="empty">Loading...</td>
             </tr>
@@ -60,11 +76,23 @@
       </section>
     </div>
 
-    <!-- Edit Modal -->
+    <!-- ── Edit Modal ────────────────────────────────────────────────────
+         The overlay covers the whole screen with a semi-transparent backdrop.
+         The inner .modal div is the visible dialog box.
+
+         Visibility is toggled by adding / removing the CSS "hidden" class:
+           • openEditModal()  → removes "hidden" (shows the modal)
+           • closeEditModal() → adds    "hidden" (hides the modal)
+
+         Clicking outside the modal box (directly on the overlay)
+         also closes it – handled by the overlay click listener in app.js.
+    ──────────────────────────────────────────────────────────────────── -->
     <div id="edit-overlay" class="overlay hidden">
       <div class="modal">
         <h2>Edit Product</h2>
         <form id="edit-form">
+          <!-- Hidden field – stores the id of the product being edited
+               so the PUT request knows which record to update on the server -->
           <input type="hidden" id="edit-id" />
           <div class="form-col">
             <label>Name
@@ -78,15 +106,22 @@
               In Stock
             </label>
           </div>
+          <!-- Error paragraph for the modal – same pattern as the main error-msg -->
           <p id="edit-error-msg" class="error hidden"></p>
           <div class="modal-actions">
             <button type="submit">Save</button>
+            <!-- type="button" prevents accidental form submission when cancelling -->
             <button type="button" id="cancel-edit">Cancel</button>
           </div>
         </form>
       </div>
     </div>
 
+    <!--
+      app.js is loaded at the bottom of <body> (not in <head>) so that all
+      DOM elements above are already parsed and available when the script runs.
+      Using defer or type="module" would also work, but bottom-of-body is the classic approach.
+    -->
     <script src="app.js"></script>
   </body>
 </html>
