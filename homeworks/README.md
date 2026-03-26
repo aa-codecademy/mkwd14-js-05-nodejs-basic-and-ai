@@ -40,5 +40,6 @@ Each homework is a **separate README** in this folder:
 
 - `README.md` — this file (overview and submission rules)
 - [**Homework: CLI “Guess the Number” game**](./homework-class-02-game.md) — after Class 02 (modules, `fs`, `readline`, JSON); optional **EventEmitter** bonus
+- [**Homework: Outing & Event Board API**](./homework-class-05-outing.md) — after Class 05 (Express fundamentals, REST API, routing)
 
 Check back as new assignments are added.
