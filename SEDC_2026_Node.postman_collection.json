@@ -188,6 +188,40 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Football App",
+      "item": [
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Vardar\",\n    \"stadium\": \"Gradski\",\n    \"founded\": 1947,\n    \"country\": \"Macedonia\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/teams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "teams"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
