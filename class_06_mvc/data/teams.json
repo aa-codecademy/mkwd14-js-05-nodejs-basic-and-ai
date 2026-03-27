@@ -5,23 +5,11 @@
     "country": "Macedonia",
     "stadium": "Gradski",
     "founded": 1947,
-    "wins": 0,
+    "wins": 1,
     "draws": 0,
     "losses": 0,
-    "goalsFor": 0,
-    "goalsAgainst": 0
-  },
-  {
-    "id": "f8616504-790b-4d9e-a3cc-415845d790e9",
-    "name": "Vardar",
-    "country": "Macedonia",
-    "stadium": "Gradski",
-    "founded": 1947,
-    "wins": 0,
-    "draws": 0,
-    "losses": 0,
-    "goalsFor": 0,
-    "goalsAgainst": 0
+    "goalsFor": 10,
+    "goalsAgainst": 1
   },
   {
     "id": "fe78b93e-3a0f-4a90-844e-411b765e950c",
@@ -30,10 +18,10 @@
     "stadium": "Unknown Stadium",
     "founded": null,
     "wins": 0,
-    "draws": 0,
-    "losses": 0,
-    "goalsFor": 0,
-    "goalsAgainst": 0
+    "draws": 1,
+    "losses": 1,
+    "goalsFor": 5,
+    "goalsAgainst": 6
   },
   {
     "id": "26a4d2ca-34cc-4f26-8df6-7907801735a7",
@@ -41,6 +29,18 @@
     "country": "Macedonia",
     "stadium": "Unknown Stadium",
     "founded": null,
+    "wins": 0,
+    "draws": 1,
+    "losses": 0,
+    "goalsFor": 0,
+    "goalsAgainst": 0
+  },
+  {
+    "id": "7bd0e3cf-acd9-4e5e-b017-a6c6851a3ca1",
+    "name": "Makedonija Gjorce Petrov",
+    "country": "Macedonia",
+    "stadium": "Gjorce",
+    "founded": 2000,
     "wins": 0,
     "draws": 0,
     "losses": 0,

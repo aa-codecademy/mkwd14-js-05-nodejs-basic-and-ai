@@ -16,6 +16,14 @@ export class TeamModel {
 		return this.#read();
 	}
 
+	async getById(id) {
+		const teams = await this.#read();
+
+		const team = teams.find(team => team.id === id);
+
+		return team ?? null;
+	}
+
 	async create({ name, country, stadium, founded }) {
 		const teams = await this.#read();
 

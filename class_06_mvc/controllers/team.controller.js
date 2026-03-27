@@ -1,10 +1,35 @@
 import { teamService } from '../services/team.service.js';
 
 export class TeamController {
-	getTeams = async (req, res) => {
-		const teams = await teamService.getTeams();
+	getTeams = async (req, res, next) => {
+		try {
+			const teams = await teamService.getTeams();
 
-		res.json(teams);
+			res.json(teams);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	getLeagueTableStandings = async (req, res, next) => {
+		try {
+			const teams = await teamService.getLeagueTableStandings();
+
+			res.json(teams);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	getTeamById = async (req, res, next) => {
+		try {
+			const id = req.params.id;
+			const team = await teamService.getTeamById(id);
+
+			res.json(team);
+		} catch (error) {
+			next(error);
+		}
 	};
 
 	createTeam = async (req, res, next) => {
