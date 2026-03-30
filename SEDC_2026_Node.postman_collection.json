@@ -247,7 +247,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/teams",
+              "raw": "http://localhost:3000/api/teams/standings",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -255,7 +255,8 @@
               "port": "3000",
               "path": [
                 "api",
-                "teams"
+                "teams",
+                "standings"
               ]
             }
           },
@@ -281,7 +282,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "26a4d2ca-34cc-4f26-8df6-7907801735a1"
+                  "value": "26a4d2ca-34cc-4f26-8df6-7907801735a7"
                 }
               ]
             }
@@ -313,14 +314,21 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/matches",
+              "raw": "localhost:3000/api/matches/:id",
               "host": [
                 "localhost"
               ],
               "port": "3000",
               "path": [
                 "api",
-                "matches"
+                "matches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "555fb00e-2c06-460c-ac2f-7b27aa2462eb"
+                }
               ]
             }
           },
@@ -333,7 +341,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"homeTeamId\": \"\",\n    \"awayTeamId\": \"\"\n}",
+              "raw": "{\n    \"homeTeamId\": \"1a4de1f2-039f-40d3-bf3a-212cdd41faab\",\n    \"awayTeamId\": \"fe78b93e-3a0f-4a90-844e-411b765e950c\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -375,7 +383,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "555fb00e-2c06-460c-ac2f-7b27aa2462eb"
+                  "value": "3f230020-9dfd-4a88-8c71-ec1d0c1e12e1"
                 }
               ]
             }
@@ -402,7 +410,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "555fb00e-2c06-460c-ac2f-7b27aa2462eb"
+                  "value": "3f230020-9dfd-4a88-8c71-ec1d0c1e12e1"
                 }
               ]
             }
@@ -415,7 +423,7 @@
             "method": "PUT",
             "header": [],
             "url": {
-              "raw": "localhost:3000/api/matches/:id/finish",
+              "raw": "localhost:3000/api/matches/:id/postpone",
               "host": [
                 "localhost"
               ],
@@ -424,12 +432,12 @@
                 "api",
                 "matches",
                 ":id",
-                "finish"
+                "postpone"
               ],
               "variable": [
                 {
                   "key": "id",
-                  "value": "555fb00e-2c06-460c-ac2f-7b27aa2462eb"
+                  "value": "8884e54e-fc30-4b5e-8c3b-86f5aaf0a50d"
                 }
               ]
             }
