@@ -306,6 +306,135 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Get match by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:3000/api/matches",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "matches"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Schedule match",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"homeTeamId\": \"\",\n    \"awayTeamId\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:3000/api/matches/schedule",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "matches",
+                "schedule"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start match",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "localhost:3000/api/matches/:id/start",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "matches",
+                ":id",
+                "start"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "555fb00e-2c06-460c-ac2f-7b27aa2462eb"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finish match",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "localhost:3000/api/matches/:id/finish",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "matches",
+                ":id",
+                "finish"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "555fb00e-2c06-460c-ac2f-7b27aa2462eb"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Postpone match",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "localhost:3000/api/matches/:id/finish",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "matches",
+                ":id",
+                "finish"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "555fb00e-2c06-460c-ac2f-7b27aa2462eb"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }

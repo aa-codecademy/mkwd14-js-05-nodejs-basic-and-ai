@@ -11,6 +11,18 @@ export class MatchController {
 		}
 	};
 
+	getById = async (req, res, next) => {
+		try {
+			const { id } = req.params;
+
+			const match = await matchService.getById(id);
+
+			res.json(match);
+		} catch (error) {
+			next(error);
+		}
+	};
+
 	scheduleMatch = async (req, res, next) => {
 		try {
 			const { homeTeamId, awayTeamId, scheduledAt } = req.body;
@@ -33,6 +45,36 @@ export class MatchController {
 				scheduledAt,
 			);
 
+			res.json(match);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	startMatch = async (req, res, next) => {
+		try {
+			const { id } = req.params;
+			const match = await matchService.startMatch(id);
+			res.json(match);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	finishMatch = async (req, res, next) => {
+		try {
+			const { id } = req.params;
+			const match = await matchService.finishMatch(id);
+			res.json(match);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	postponeMatch = async (req, res, next) => {
+		try {
+			const { id } = req.params;
+			const match = await matchService.postponeMatch(id);
 			res.json(match);
 		} catch (error) {
 			next(error);

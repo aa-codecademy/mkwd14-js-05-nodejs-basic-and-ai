@@ -23,6 +23,12 @@ export class MatchModel {
 		return this.#read();
 	}
 
+	async getById(id) {
+		const matches = await this.#read();
+
+		return matches.find(match => match.id === id) ?? null;
+	}
+
 	async create(homeTeamId, awayTeamId, scheduledAt) {
 		const matches = await this.#read();
 
@@ -44,6 +50,30 @@ export class MatchModel {
 		matches.push(match);
 		await this.#write(matches);
 		return match;
+	}
+
+	async update(id, { status, startedAt, finishedAt, postponedTo }) {
+		const matches = await this.#read();
+
+		const index = matches.findIndex(match => match.id === id);
+
+		if (index === -1) {
+			const err = new Error(`Match with ID: ${id} doesn't exist.`);
+			err.status = 404;
+			throw err;
+		}
+
+		matches[index] = {
+			...matches[index],
+			status,
+			startedAt: startedAt ? startedAt : matches[index].startedAt,
+			finishedAt: finishedAt ? finishedAt : matches[index].finishedAt,
+			postponedTo: postponedTo ? postponedTo : matches[index].postponedTo,
+		};
+
+		this.#write(matches);
+
+		return matches[index];
 	}
 }
 
