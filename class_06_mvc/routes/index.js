@@ -15,7 +15,7 @@
  * -----------------
  * Each resource gets its own URL namespace:
  *   /api/teams   → team.routes.js
- *   /api/matches → (future) match.routes.js
+ *   /api/matches → match.routes.js
  *
  * This mirrors the RESTful resource-per-router pattern used in professional
  * Express applications.
@@ -32,6 +32,8 @@ const router = Router();
 // Mount the team resource router.
 // Any request to /api/teams/* is forwarded to teamRouter for further routing.
 router.use('/teams', teamRouter);
+// Mount the match resource router.
+// Any request to /api/matches/* is forwarded to matchRouter for further routing.
 router.use('/matches', matchRouter);
 
 export default router;

@@ -19,9 +19,12 @@ A football league management API built with Node.js and Express to demonstrate t
    - [View](#view-the-frontend)
 4. [Request Lifecycle](#request-lifecycle)
 5. [Data Flow Example](#data-flow-example)
-6. [Project Structure](#project-structure)
-7. [API Endpoints](#api-endpoints)
-8. [Setup & Running](#setup--running)
+6. [Match State Machine](#match-state-machine)
+7. [Project Structure](#project-structure)
+8. [API Endpoints](#api-endpoints)
+   - [Teams](#teams-endpoints)
+   - [Matches](#matches-endpoints)
+9. [Setup & Running](#setup--running)
 
 ---
 
@@ -77,29 +80,29 @@ REST API MVC:  Browser ← JSON ← Controller ← Model ← Database
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    ROUTES  (routes/)                                │
-│          routes/index.js → routes/team.routes.js                   │
+│   routes/index.js → team.routes.js / match.routes.js               │
 │          Maps HTTP verb + URL path to a controller method          │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                  CONTROLLER  (controllers/)                         │
-│               controllers/team.controller.js                       │
+│     team.controller.js  /  match.controller.js                     │
 │   Reads req → validates input → calls service → sends res.json()  │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                   SERVICE  (services/)                              │
-│                 services/team.service.js                           │
-│  Contains business logic: standings calculation, sorting, rules    │
+│       team.service.js  /  match.service.js                         │
+│  Business logic: standings, state transitions, data enrichment     │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     MODEL  (models/)                                │
-│                   models/team.model.js                             │
-│  Data access: getAll, getById, create. Enforces data integrity     │
+│         team.model.js  /  match.model.js                           │
+│  Data access: getAll, getById, create, update. Data integrity      │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                                ▼
@@ -137,9 +140,11 @@ index.js
 
 ### Routes — The Dispatcher
 
-**Files:** `routes/index.js`, `routes/team.routes.js`
+**Files:** `routes/index.js`, `routes/team.routes.js`, `routes/match.routes.js`
 
 Routes are **intentionally dumb** — they only map an HTTP verb + URL to a controller method. Zero logic. Zero data access.
+
+**Team routes:**
 
 ```
 GET  /api/teams/standings  →  teamController.getLeagueTableStandings
@@ -148,19 +153,31 @@ GET  /api/teams/:id        →  teamController.getTeamById
 POST /api/teams            →  teamController.createTeam
 ```
 
+**Match routes:**
+
+```
+GET  /api/matches              →  matchController.getAll
+GET  /api/matches/:id          →  matchController.getById
+POST /api/matches/schedule     →  matchController.scheduleMatch
+PUT  /api/matches/:id/start    →  matchController.startMatch
+PUT  /api/matches/:id/finish   →  matchController.finishMatch
+PUT  /api/matches/:id/postpone →  matchController.postponeMatch
+```
+
 > **Important — route order matters.** `/standings` must be declared _before_ `/:id`, otherwise Express will match the string `"standings"` as the `:id` parameter value.
 
-Routes are split into two files:
-- `routes/index.js` — the **root API router**. Mounts resource-specific routers under their namespace (`/teams`, `/matches`, etc.).
-- `routes/team.routes.js` — all endpoints for the `teams` resource only.
+Routes are split into resource-specific files:
+- `routes/index.js` — the **root API router**. Mounts resource-specific routers under their namespace (`/teams`, `/matches`).
+- `routes/team.routes.js` — all endpoints for the `teams` resource.
+- `routes/match.routes.js` — all endpoints for the `matches` resource.
 
-This structure scales cleanly: adding a `matches` resource only requires a new `routes/match.routes.js` and one line in `routes/index.js`.
+This structure scales cleanly: adding a new resource only requires a new `routes/<resource>.routes.js` and one line in `routes/index.js`.
 
 ---
 
 ### Controller — The Bridge
 
-**File:** `controllers/team.controller.js`
+**Files:** `controllers/team.controller.js`, `controllers/match.controller.js`
 
 The Controller sits at the HTTP boundary. It:
 1. Extracts data from the request (`req.params`, `req.body`, `req.query`).
@@ -186,36 +203,43 @@ async getTeams(req, res, next) { ... }
 
 Express calls route handlers without the class context, so `this` inside a regular method would be `undefined`. Arrow functions capture `this` from the enclosing class at definition time.
 
+**Match controller specifics:** The match controller handles state-transition endpoints (start, finish, postpone). HTTP-level validation checks request shape (are both team IDs present? is a team playing itself?), while the service handles domain validation (do those teams exist? is the match in the right status?).
+
 ---
 
 ### Service — The Brain
 
-**File:** `services/team.service.js`
+**Files:** `services/team.service.js`, `services/match.service.js`
 
 The Service layer is where **business logic** lives. It knows the domain rules of the application, but knows nothing about HTTP.
 
-In this project the team service:
+**Team service responsibilities:**
 - Computes points (`wins × 3 + draws`) — not stored in the DB to avoid inconsistency.
 - Computes goal difference (`goalsFor − goalsAgainst`).
 - Sorts teams into league table order.
 - Enforces the rule that fetching a non-existent team is an error (throws, so the controller can map it to 404).
 
+**Match service responsibilities:**
+- Enforces the **match state machine** (only scheduled matches can be started, only live matches can be finished, etc.).
+- Validates **cross-resource references** (both team IDs must exist before scheduling a match).
+- **Enriches** match data by joining team names from the Team model — a manual JOIN, similar to what a relational database does automatically.
+
 ```
-Service knows:   domain rules, calculations, what "not found" means
+Service knows:   domain rules, calculations, state machines, cross-resource joins
 Service avoids:  req/res objects, status codes, file system access
 ```
 
-The `#enrich()` private method is a good example of encapsulation — it is the single source of truth for how computed stats are derived, used internally by `getLeagueTableStandings`.
+The `#enrich()` private method is used in both services — it is the single source of truth for how derived data is computed, keeping enrichment logic encapsulated and reusable within each class.
 
 ---
 
 ### Model — The Gatekeeper
 
-**File:** `models/team.model.js`
+**Files:** `models/team.model.js`, `models/match.model.js`
 
 The Model is the **only layer that talks to storage**. It:
-- Provides a semantic API (`getAll`, `getById`, `create`) over raw file I/O.
-- Defines the **shape** of a team record.
+- Provides a semantic API (`getAll`, `getById`, `create`, `update`) over raw file I/O.
+- Defines the **shape** of a record (team or match).
 - Enforces **data-integrity rules** (e.g. no duplicate team names, default values for optional fields, UUID generation).
 
 ```
@@ -224,6 +248,10 @@ Model avoids:   business rules like point calculations, HTTP concerns
 ```
 
 Private fields (`#db`, `#read`, `#write`) ensure that nothing outside the class can bypass the model's validation logic and write directly to the file.
+
+**Match model specifics:**
+- Uses a **static `STATUS` enum** to define valid match statuses — avoids magic strings throughout the codebase.
+- The `update()` method implements a **read-modify-write** pattern for partial updates: spread the existing record, then overwrite only the provided fields.
 
 > **Swapping storage later:** because all I/O is isolated here (and in DbService), replacing JSON files with a real database (MongoDB, PostgreSQL) only requires changing the Model — the Service and Controller are untouched.
 
@@ -285,6 +313,11 @@ public/
 ```
 
 The View **only communicates with the backend via HTTP (`fetch` calls)**. It has no direct access to the Controller, Service, or Model. This is the fundamental contract of a REST API architecture — the server and client are completely decoupled.
+
+The SPA includes three tabs:
+- **League Table** — fetches `GET /api/teams/standings` and renders a sorted table.
+- **Matches** — displays match cards with status badges and action buttons (start, finish, postpone). Supports scheduling new matches.
+- **Teams** — lists all teams with search/filter/sort/pagination. Includes a form to add new teams.
 
 ---
 
@@ -366,6 +399,35 @@ Browser  ←  409 Conflict  { message: 'Team with name: X already exists.' }
 
 ---
 
+## Match State Machine
+
+Matches follow a strict lifecycle. Each transition is enforced by the **Service layer** (not the Controller or Model):
+
+```
+                 ┌──────────┐
+        POST     │          │     PUT /:id/start
+     /schedule → │ SCHEDULED│ ──────────────────→ ┌──────┐  PUT /:id/finish  ┌──────────┐
+                 │          │                      │ LIVE │ ────────────────→ │ FINISHED │
+                 └────┬─────┘                      └──────┘                  └──────────┘
+                      │
+                      │ PUT /:id/postpone
+                      ▼
+                 ┌───────────┐
+                 │ POSTPONED │
+                 └───────────┘
+```
+
+**Rules:**
+- A match starts in **SCHEDULED** status when created.
+- Only **SCHEDULED** matches can be **started** (→ LIVE).
+- Only **LIVE** matches can be **finished** (→ FINISHED).
+- Only **SCHEDULED** matches can be **postponed** (→ POSTPONED).
+- Invalid transitions return **400 Bad Request** with a descriptive message.
+
+This is a classic example of a **state machine** in a backend API — a common pattern for resources with a lifecycle (orders, tickets, invoices, matches).
+
+---
+
 ## Project Structure
 
 ```
@@ -375,24 +437,28 @@ class_06_mvc/
 │
 ├── routes/
 │   ├── index.js                ← Root API router (/api)
-│   └── team.routes.js          ← Team resource endpoints (/api/teams)
+│   ├── team.routes.js          ← Team resource endpoints (/api/teams)
+│   └── match.routes.js         ← Match resource endpoints (/api/matches)
 │
 ├── controllers/
-│   └── team.controller.js      ← HTTP ↔ Service bridge (C in MVC)
+│   ├── team.controller.js      ← HTTP ↔ Service bridge for teams (C in MVC)
+│   └── match.controller.js     ← HTTP ↔ Service bridge for matches
 │
 ├── services/
-│   ├── team.service.js         ← Business logic layer
+│   ├── team.service.js         ← Business logic for teams
+│   ├── match.service.js        ← Business logic for matches (state machine)
 │   └── db.service.js           ← Generic JSON file persistence
 │
 ├── models/
-│   └── team.model.js           ← Data access + integrity (M in MVC)
+│   ├── team.model.js           ← Data access + integrity for teams (M in MVC)
+│   └── match.model.js          ← Data access + integrity for matches
 │
 ├── middleware/
 │   └── error-handler.js        ← Centralised error formatting
 │
 ├── data/
 │   ├── teams.json              ← Team records (flat-file DB)
-│   └── matches.json            ← Match records (placeholder)
+│   └── matches.json            ← Match records (flat-file DB)
 │
 ├── public/                     ← SPA served by express.static (V in MVC)
 │   ├── index.html
@@ -407,6 +473,8 @@ class_06_mvc/
 
 ## API Endpoints
 
+### Teams Endpoints
+
 | Method | Endpoint | Description | Status Codes |
 |--------|----------|-------------|--------------|
 | `GET` | `/api/teams` | Get all teams | 200 |
@@ -414,7 +482,7 @@ class_06_mvc/
 | `GET` | `/api/teams/:id` | Get team by UUID | 200, 404 |
 | `POST` | `/api/teams` | Create a new team | 201, 400, 409 |
 
-### POST `/api/teams` — Request Body
+#### POST `/api/teams` — Request Body
 
 ```json
 {
@@ -427,7 +495,7 @@ class_06_mvc/
 
 `name` and `country` are required. `stadium` defaults to `"Unknown Stadium"`. `founded` defaults to `null`.
 
-### Team Object Shape
+#### Team Object Shape
 
 ```json
 {
@@ -452,6 +520,52 @@ Standings response additionally includes:
   "goalDifference": 0
 }
 ```
+
+### Matches Endpoints
+
+| Method | Endpoint | Description | Status Codes |
+|--------|----------|-------------|--------------|
+| `GET` | `/api/matches` | Get all matches (enriched with team names) | 200 |
+| `GET` | `/api/matches/:id` | Get match by UUID (enriched) | 200, 404 |
+| `POST` | `/api/matches/schedule` | Schedule a new match | 200, 400, 404 |
+| `PUT` | `/api/matches/:id/start` | Start a scheduled match | 200, 400, 404 |
+| `PUT` | `/api/matches/:id/finish` | Finish a live match | 200, 400, 404 |
+| `PUT` | `/api/matches/:id/postpone` | Postpone a scheduled match | 200, 400, 404 |
+
+#### POST `/api/matches/schedule` — Request Body
+
+```json
+{
+  "homeTeamId": "550e8400-e29b-41d4-a716-446655440000",
+  "awayTeamId": "660e8400-e29b-41d4-a716-446655440111",
+  "scheduledAt": "2026-04-15T20:00:00.000Z"
+}
+```
+
+`homeTeamId` and `awayTeamId` are required. `scheduledAt` defaults to the current time if not provided. Both team IDs must reference existing teams.
+
+#### Match Object Shape
+
+```json
+{
+  "id": "770e8400-e29b-41d4-a716-446655440222",
+  "homeTeamId": "550e8400-e29b-41d4-a716-446655440000",
+  "awayTeamId": "660e8400-e29b-41d4-a716-446655440111",
+  "scheduledAt": "2026-04-15T20:00:00.000Z",
+  "homeScore": 0,
+  "awayScore": 0,
+  "goals": [],
+  "minute": 0,
+  "startedAt": null,
+  "finishedAt": null,
+  "postponedTo": null,
+  "status": "scheduled",
+  "homeTeamName": "Arsenal",
+  "awayTeamName": "Chelsea"
+}
+```
+
+`homeTeamName` and `awayTeamName` are **computed fields** — added by the service layer through data enrichment, not stored in the database.
 
 ---
 
@@ -481,3 +595,6 @@ The API is available at [http://localhost:3000/api](http://localhost:3000/api).
 3. **Errors propagate via `next(error)`** — no try/catch spaghetti; all errors are handled in one place.
 4. **Services are the right place for business logic** — not Controllers, not Models.
 5. **Models are the only door to your data** — everything else asks the Model; nothing bypasses it.
+6. **State machines belong in the Service layer** — the match lifecycle (scheduled → live → finished) is a domain rule, enforced by the service, not the controller or model.
+7. **Data enrichment (JOINs) belong in the Service layer** — when one resource needs data from another (match needs team names), the service performs the lookup.
+8. **Static properties as enums** — `MatchModel.STATUS` centralises allowed status values, preventing typos and magic strings.

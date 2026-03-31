@@ -64,6 +64,8 @@ app.use(express.static(join(__dirname, 'public')));
  *   /api                → routes/index.js  (root API router)
  *   /api/teams          → routes/team.routes.js  (team resource router)
  *   /api/teams/:id      → teamController.getTeamById
+ *   /api/matches        → routes/match.routes.js  (match resource router)
+ *   /api/matches/:id    → matchController.getById
  */
 app.use('/api', router);
 
