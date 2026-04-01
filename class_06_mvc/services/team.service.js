@@ -38,27 +38,43 @@ export class TeamService {
 	async getTeams({
 		q, // Optional query parameter for searching teams by name (case-insensitive substring match).
 		country, // Optional query parameter for filtering teams by country (case-insensitive exact match).
-		page = 1,
-		limit = 6,
+		page = 1, // Optional query parameter for pagination: page number (default 1). This info tells us which is the current page in view
+		limit = 6, // Optional query parameter for pagination: number of items per page (default 6). This info tells us how many items we want to see per page
+		sortBy = 'name',
+		order = 'asc',
 	}) {
-		console.log('🚀 ivo-test ~ TeamService ~ getTeams ~ country:', country);
-		console.log('🚀 ivo-test ~ TeamService ~ getTeams ~ q:', q);
 		const teams = await Team.getAll();
-		let filteredTeams = [...teams];
+		let filteredTeams = [...teams].map(team => this.#enrich(team));
 
+		// Apply filter only if present, otherwise return all teams. This allows for flexible querying without requiring all parameters.
 		if (q) {
+			// Case-insensitive substring match for team name. This allows clients to search for teams by partial name matches without worrying about case sensitivity.
 			filteredTeams = filteredTeams.filter(team =>
 				team.name.toLowerCase().includes(q.toLowerCase()),
 			);
 		}
 
 		if (country) {
+			// Strict equality match for country, ignoring case. This allows clients to filter teams by their country of origin.
 			filteredTeams = filteredTeams.filter(team => team.country === country);
 		}
 
-		const total = filteredTeams.length;
-		const totalPages = Math.ceil(total / limit) || 1;
-		const data = filteredTeams.slice((page - 1) * limit, page * limit);
+		// Sorting logic:
+		const sortOptions = {
+			points: 'points',
+			name: 'name',
+			wins: 'wins',
+		};
+		const field = sortOptions[sortBy] || 'name';
+		const dir = order === 'asc' ? 1 : -1;
+		filteredTeams.sort(
+			(a, b) => dir * ((a[field] > b[field]) - (a[field] < b[field])),
+		);
+
+		// Pagination logic: calculate total items, total pages, and slice the filtered array to return only the items for the requested page. This allows clients to navigate through large datasets efficiently.
+		const total = filteredTeams.length; // Total number of items after filtering, used for pagination metadata.
+		const totalPages = Math.ceil(total / limit) || 1; // Total number of pages based on the limit, ensuring at least 1 page to avoid division by zero.
+		const data = filteredTeams.slice((page - 1) * limit, page * limit); // Slice the array to return only the items for the current page based on the page number and limit.
 
 		return { data, pagination: { total, page, limit, totalPages } };
 	}

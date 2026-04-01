@@ -227,7 +227,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/teams?country=Spain&page=1&limit=6",
+              "raw": "http://localhost:3000/api/teams?page=1&sortBy=name&order=desc",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -247,16 +247,25 @@
                 {
                   "key": "country",
                   "value": "Spain",
-                  "type": "text"
+                  "disabled": true
                 },
                 {
                   "key": "page",
-                  "value": "1",
-                  "type": "text"
+                  "value": "1"
                 },
                 {
                   "key": "limit",
                   "value": "6",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "name",
+                  "type": "text"
+                },
+                {
+                  "key": "order",
+                  "value": "desc",
                   "type": "text"
                 }
               ]
@@ -381,6 +390,42 @@
                 "api",
                 "matches",
                 "schedule"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add goal to match",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"teamId\": \"team-002\",\n    \"scorer\": \"Valverde\",\n    \"minute\": 65\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:3000/api/matches/:id/goal",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "matches",
+                ":id",
+                "goal"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "43f3a63c-9d25-4a0d-a589-37707a9458dc"
+                }
               ]
             }
           },

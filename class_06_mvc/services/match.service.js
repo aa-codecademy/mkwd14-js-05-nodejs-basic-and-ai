@@ -27,6 +27,7 @@
 
 import { Match, MatchModel } from '../models/match.model.js';
 import { Team } from '../models/team.model.js';
+import { randomUUID } from 'crypto';
 
 export class MatchService {
 	/**
@@ -161,6 +162,45 @@ export class MatchService {
 			status: MatchModel.STATUS.POSTPONED,
 			postponedTo: new Date('2027-01-01').toISOString(),
 		});
+
+		return updatedMatch;
+	}
+
+	async addGoal(matchId, { teamId, scorer, minute }) {
+		const match = await this.getById(matchId);
+		console.log('🚀 ivo-test ~ MatchService ~ addGoal ~ match:', match);
+
+		if (match.status !== MatchModel.STATUS.LIVE) {
+			const err = new Error('Match is not live.');
+			err.status = 400;
+			throw err;
+		}
+
+		if (teamId && teamId !== match.homeTeamId && teamId !== match.awayTeamId) {
+			const err = new Error('Team not involved in this match.');
+			err.status = 400;
+			throw err;
+		}
+
+		match.goals.push({ id: randomUUID(), teamId, scorer, minute });
+		console.log('🚀 ivo-test ~ MatchService ~ addGoal ~ match:', match);
+
+		if (teamId === match.homeTeamId) {
+			match.homeScore += 1;
+		} else if (teamId === match.awayTeamId) {
+			match.awayScore += 1;
+		}
+		console.log('🚀 ivo-test ~ MatchService ~ addGoal ~ match:', match);
+
+		const updatedMatch = await Match.update(matchId, {
+			goals: match.goals,
+			homeScore: match.homeScore,
+			awayScore: match.awayScore,
+		});
+		console.log(
+			'🚀 ivo-test ~ MatchService ~ addGoal ~ updatedMatch:',
+			updatedMatch,
+		);
 
 		return updatedMatch;
 	}

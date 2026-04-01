@@ -125,7 +125,10 @@ export class MatchModel {
 	 * ensure we only overwrite a timestamp field when a new value is actually
 	 * provided — otherwise the existing value is preserved.
 	 */
-	async update(id, { status, startedAt, finishedAt, postponedTo }) {
+	async update(
+		id,
+		{ status, startedAt, finishedAt, postponedTo, goals, homeScore, awayScore },
+	) {
 		const matches = await this.#read();
 
 		const index = matches.findIndex(match => match.id === id);
@@ -138,10 +141,13 @@ export class MatchModel {
 
 		matches[index] = {
 			...matches[index],
-			status,
+			status: status || matches[index].status,
 			startedAt: startedAt ? startedAt : matches[index].startedAt,
 			finishedAt: finishedAt ? finishedAt : matches[index].finishedAt,
 			postponedTo: postponedTo ? postponedTo : matches[index].postponedTo,
+			goals: goals ? goals : matches[index].goals,
+			homeScore: homeScore !== undefined ? homeScore : matches[index].homeScore,
+			awayScore: awayScore !== undefined ? awayScore : matches[index].awayScore,
 		};
 
 		this.#write(matches);

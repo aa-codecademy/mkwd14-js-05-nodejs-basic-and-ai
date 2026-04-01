@@ -148,6 +148,21 @@ export class MatchController {
 			next(error);
 		}
 	};
+
+	addGoal = async (req, res, next) => {
+		try {
+			const { id: matchId } = req.params;
+			const { teamId, scorer, minute } = req.body;
+			const match = await matchService.addGoal(matchId, {
+				teamId,
+				scorer,
+				minute,
+			});
+			res.status(201).json(match);
+		} catch (error) {
+			next(error);
+		}
+	};
 }
 
 // Singleton instance — same pattern as TeamController.

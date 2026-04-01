@@ -1,100 +1,56 @@
 [
   {
-    "id": "adsfdsa",
-    "homeTeamId": "7bd0e3cf-acd9-4e5e-b017-a6c6851a3ca1",
-    "awayTeamId": "26a4d2ca-34cc-4f26-8df6-7907801735a7",
-    "homeScore": 0,
-    "awayScore": 0,
-    "status": "live",
-    "goals": [],
-    "scheduledAt": "2026-03-27T16:09:19.377Z",
-    "startedAt": "2026-03-30T18:32:27.475Z",
-    "finishedAt": "2026-03-27T16:10:19.377Z",
-    "postponedTo": "2026-03-27T16:10:19.377Z",
-    "minute": 0
-  },
-  {
-    "id": "555fb00e-2c06-460c-ac2f-7b27aa2462eb",
-    "homeTeamId": "1a4de1f2-039f-40d3-bf3a-212cdd41faab",
-    "awayTeamId": "fe78b93e-3a0f-4a90-844e-411b765e950c",
-    "scheduledAt": "2026-03-30T17:32:35.163Z",
-    "homeScore": 0,
-    "awayScore": 0,
-    "goals": [],
+    "id": "43f3a63c-9d25-4a0d-a589-37707a9458dc",
+    "homeTeamId": "team-001",
+    "awayTeamId": "team-002",
+    "scheduledAt": "2026-04-01T19:28:00.000Z",
+    "homeScore": 1,
+    "awayScore": 1,
+    "goals": [
+      {
+        "id": "fdcd2f09-cc21-4ab4-ab0d-ca5f95c517a1",
+        "teamId": "team-001",
+        "scorer": "Yamal",
+        "minute": 60
+      },
+      {
+        "id": "5e8beb90-df59-4508-841c-6a2fe9830d0b",
+        "teamId": "team-002",
+        "scorer": "Valverde",
+        "minute": 65
+      }
+    ],
     "minute": 0,
-    "startedAt": "2026-03-30T18:32:55.620Z",
-    "finishedAt": "2026-03-30T18:41:44.282Z",
-    "postponedTo": null,
-    "status": "finished"
-  },
-  {
-    "id": "7288e32a-c5cb-4ee5-ab28-d9d5f3946e77",
-    "homeTeamId": "7bd0e3cf-acd9-4e5e-b017-a6c6851a3ca1",
-    "awayTeamId": "26a4d2ca-34cc-4f26-8df6-7907801735a7",
-    "scheduledAt": "2026-05-01T18:45:00.000Z",
-    "homeScore": 0,
-    "awayScore": 0,
-    "goals": [],
-    "minute": 0,
-    "startedAt": "2026-03-30T18:33:16.196Z",
-    "finishedAt": "2026-03-30T18:41:29.302Z",
-    "postponedTo": null,
-    "status": "finished"
-  },
-  {
-    "id": "3f230020-9dfd-4a88-8c71-ec1d0c1e12e1",
-    "homeTeamId": "fe78b93e-3a0f-4a90-844e-411b765e950c",
-    "awayTeamId": "26a4d2ca-34cc-4f26-8df6-7907801735a7",
-    "scheduledAt": "2026-03-30T00:48:00.000Z",
-    "homeScore": 0,
-    "awayScore": 0,
-    "goals": [],
-    "minute": 0,
-    "startedAt": "2026-03-30T18:43:03.534Z",
+    "startedAt": "2026-04-01T17:26:42.816Z",
     "finishedAt": null,
     "postponedTo": null,
     "status": "live"
   },
   {
-    "id": "dea30d39-29c4-4825-accd-75c9efa2caf4",
-    "homeTeamId": "7bd0e3cf-acd9-4e5e-b017-a6c6851a3ca1",
-    "awayTeamId": "1a4de1f2-039f-40d3-bf3a-212cdd41faab",
-    "scheduledAt": "2026-03-30T18:46:03.806Z",
-    "homeScore": 0,
-    "awayScore": 0,
-    "goals": [],
+    "id": "2803d4d6-abb4-4d31-b974-01c5c64b3a77",
+    "homeTeamId": "team-007",
+    "awayTeamId": "team-010",
+    "scheduledAt": "2026-04-01T19:28:00.000Z",
+    "homeScore": 1,
+    "awayScore": 1,
+    "goals": [
+      {
+        "id": "5726de04-418c-437b-a43e-8380152d6767",
+        "teamId": "team-007",
+        "scorer": "Salah",
+        "minute": 1
+      },
+      {
+        "id": "f5092845-d2c5-4b48-8d61-1645048658d7",
+        "teamId": "team-010",
+        "scorer": "Kane",
+        "minute": 12
+      }
+    ],
     "minute": 0,
-    "startedAt": null,
+    "startedAt": "2026-04-01T17:31:10.020Z",
     "finishedAt": null,
     "postponedTo": null,
-    "status": "postponed"
-  },
-  {
-    "id": "8884e54e-fc30-4b5e-8c3b-86f5aaf0a50d",
-    "homeTeamId": "26a4d2ca-34cc-4f26-8df6-7907801735a7",
-    "awayTeamId": "7bd0e3cf-acd9-4e5e-b017-a6c6851a3ca1",
-    "scheduledAt": "2026-03-30T18:50:40.184Z",
-    "homeScore": 0,
-    "awayScore": 0,
-    "goals": [],
-    "minute": 0,
-    "startedAt": null,
-    "finishedAt": null,
-    "postponedTo": "2027-01-01T00:00:00.000Z",
-    "status": "postponed"
-  },
-  {
-    "id": "0e56aa9e-2f65-47df-b340-1288b14e9422",
-    "homeTeamId": "fe78b93e-3a0f-4a90-844e-411b765e950c",
-    "awayTeamId": "1a4de1f2-039f-40d3-bf3a-212cdd41faab",
-    "scheduledAt": "2026-03-30T18:51:37.187Z",
-    "homeScore": 0,
-    "awayScore": 0,
-    "goals": [],
-    "minute": 0,
-    "startedAt": null,
-    "finishedAt": null,
-    "postponedTo": "2027-01-01T00:00:00.000Z",
-    "status": "postponed"
+    "status": "live"
   }
 ]

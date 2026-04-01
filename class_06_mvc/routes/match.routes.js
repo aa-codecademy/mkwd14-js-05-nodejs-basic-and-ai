@@ -44,5 +44,6 @@ matchRouter.post('/schedule', matchController.scheduleMatch);
 matchRouter.put('/:id/start', matchController.startMatch);
 matchRouter.put('/:id/finish', matchController.finishMatch);
 matchRouter.put('/:id/postpone', matchController.postponeMatch);
+matchRouter.post('/:id/goal', matchController.addGoal)
 
 export default matchRouter;
