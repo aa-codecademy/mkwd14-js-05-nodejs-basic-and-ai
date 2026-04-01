@@ -1,30 +1,46 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient } from "mongodb";
 
-const MONGO_USERNAME = 'sedc_test';
-const MONGO_PASSWORD = 'ppufWK0cbKDk6f2j';
-const MONGO_CLUSTER = 'cluster0';
-const DB_NAME = 'g2_test';
+/**
+ * class_08_mongo/db.js
+ * --------------------
+ * This module is responsible only for MongoDB connection management.
+ *
+ * WHY A SEPARATE FILE?
+ * - index.js keeps HTTP logic (routes/server).
+ * - db.js keeps DB connection logic.
+ * This separation makes the flow easier to teach and maintain.
+ */
 
+const MONGO_USERNAME = "sedc_test";
+const MONGO_PASSWORD = "ppufWK0cbKDk6f2j";
+const MONGO_CLUSTER = "cluster0";
+const DB_NAME = "g2_test";
+
+// Mongo connection string for Atlas.
+// For this class demo it is intentionally simple/hardcoded.
 const client = new MongoClient(
-	`mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}.3y9yiup.mongodb.net/${DB_NAME}?appName=Cluster0`,
+  `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}.3y9yiup.mongodb.net/${DB_NAME}?appName=Cluster0`,
 );
 
 let db = null;
 
 export async function connectToDb() {
-	try {
-		const connection = await client.connect();
-		db = connection.db();
-		console.log('Connected to MongoDB');
-	} catch (error) {
-		console.error('Error connecting to MongoDB:', error);
-		process.exit(1);
-	}
+  try {
+    // Connect once when server starts.
+    const connection = await client.connect();
+    // connection.db() returns the DB selected in the connection string.
+    db = connection.db();
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+    process.exit(1);
+  }
 }
 
 export function getDb() {
-	if (!db) {
-		console.log('Database is not initialized. Initializing now...');
-	}
-	return db;
+  // Any route that needs the DB imports and calls this function.
+  if (!db) {
+    console.log("Database is not initialized. Initializing now...");
+  }
+  return db;
 }

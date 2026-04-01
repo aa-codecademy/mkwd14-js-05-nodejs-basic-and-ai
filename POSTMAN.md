@@ -11,13 +11,13 @@ We use **Postman** to test and explore APIs during classes.
 
 ## Basic concepts
 
-| Term | Description |
-|------|-------------|
-| **Request** | An HTTP call you send to an API (GET, POST, PUT, DELETE, etc.) |
-| **Collection** | A group of saved requests organized together |
-| **Environment** | A set of variables (e.g. `baseUrl`) you can reuse across requests |
+| Term              | Description                                                       |
+| ----------------- | ----------------------------------------------------------------- |
+| **Request**       | An HTTP call you send to an API (GET, POST, PUT, DELETE, etc.)    |
+| **Collection**    | A group of saved requests organized together                      |
+| **Environment**   | A set of variables (e.g. `baseUrl`) you can reuse across requests |
 | **Params / Body** | Data you send with a request — query params, JSON body, form data |
-| **Response** | What the server sends back — status code, headers, body |
+| **Response**      | What the server sends back — status code, headers, body           |
 
 ## Quick start
 
@@ -29,8 +29,15 @@ We use **Postman** to test and explore APIs during classes.
 
 ## Class collection
 
-All requests we use during classes are saved in a shared Postman collection. Import it by clicking the link below:
+The class Postman collection is available in the project root as a JSON file:
 
-**[Open class collection in Postman](https://web.postman.co/workspace/My-Workspace~1e633c6b-0cb8-4ef5-8825-f66efb664855/collection/4603765-11b6609a-d85c-4840-890d-d69a74b1874f?action=share&source=copy-link&creator=4603765)**
+- `mkwd14_nodejs_api_collection.postman_collection.json`
 
-> If the link opens in the browser, click **"Open in Postman"** to load the collection into your desktop app.
+### How to import it in Postman
+
+1. Open Postman.
+2. Click **Import** (top-left).
+3. Choose **Upload Files**.
+4. Select `mkwd14_nodejs_api_collection.postman_collection.json` from the root folder of this repository.
+5. Click **Import**.
+6. Open the imported collection from the left sidebar and start sending requests.

@@ -23,27 +23,30 @@
  *   PUT  /api/matches/:id/start    → matchController.startMatch
  *   PUT  /api/matches/:id/finish   → matchController.finishMatch
  *   PUT  /api/matches/:id/postpone → matchController.postponeMatch
+ *   POST /api/matches/:id/goal     → matchController.addGoal
  */
 
-import { Router } from 'express';
-import { matchController } from '../controllers/match.controller.js';
+import { Router } from "express";
+import { matchController } from "../controllers/match.controller.js";
 
 const matchRouter = new Router();
 
 // List all matches.
-matchRouter.get('/', matchController.getAll);
+matchRouter.get("/", matchController.getAll);
 
 // Get a single match by UUID.
-matchRouter.get('/:id', matchController.getById);
+matchRouter.get("/:id", matchController.getById);
 
 // Create (schedule) a new match. Uses POST because it creates a resource.
-matchRouter.post('/schedule', matchController.scheduleMatch);
+matchRouter.post("/schedule", matchController.scheduleMatch);
 
 // State transitions — use PUT because they update an existing resource.
 // Each endpoint changes the match status and records a timestamp.
-matchRouter.put('/:id/start', matchController.startMatch);
-matchRouter.put('/:id/finish', matchController.finishMatch);
-matchRouter.put('/:id/postpone', matchController.postponeMatch);
-matchRouter.post('/:id/goal', matchController.addGoal)
+matchRouter.put("/:id/start", matchController.startMatch);
+matchRouter.put("/:id/finish", matchController.finishMatch);
+matchRouter.put("/:id/postpone", matchController.postponeMatch);
+
+// Adds a goal event to a specific live match.
+matchRouter.post("/:id/goal", matchController.addGoal);
 
 export default matchRouter;
