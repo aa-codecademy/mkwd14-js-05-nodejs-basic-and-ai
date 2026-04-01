@@ -35,8 +35,32 @@ export class TeamService {
 	 * Returns the raw list of all teams directly from the model.
 	 * No transformation needed — the stored data is sufficient.
 	 */
-	getTeams() {
-		return Team.getAll();
+	async getTeams({
+		q, // Optional query parameter for searching teams by name (case-insensitive substring match).
+		country, // Optional query parameter for filtering teams by country (case-insensitive exact match).
+		page = 1,
+		limit = 6,
+	}) {
+		console.log('🚀 ivo-test ~ TeamService ~ getTeams ~ country:', country);
+		console.log('🚀 ivo-test ~ TeamService ~ getTeams ~ q:', q);
+		const teams = await Team.getAll();
+		let filteredTeams = [...teams];
+
+		if (q) {
+			filteredTeams = filteredTeams.filter(team =>
+				team.name.toLowerCase().includes(q.toLowerCase()),
+			);
+		}
+
+		if (country) {
+			filteredTeams = filteredTeams.filter(team => team.country === country);
+		}
+
+		const total = filteredTeams.length;
+		const totalPages = Math.ceil(total / limit) || 1;
+		const data = filteredTeams.slice((page - 1) * limit, page * limit);
+
+		return { data, pagination: { total, page, limit, totalPages } };
 	}
 
 	/**

@@ -42,7 +42,8 @@ export class TeamController {
 	 */
 	getTeams = async (req, res, next) => {
 		try {
-			const teams = await teamService.getTeams();
+			const query = req.query;
+			const teams = await teamService.getTeams(query);
 
 			// 200 OK is the default status; res.json sets Content-Type: application/json.
 			res.json(teams);

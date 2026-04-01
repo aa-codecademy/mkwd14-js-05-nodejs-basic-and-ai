@@ -252,12 +252,12 @@ function renderMatchCard(m) {
     const dateStr = new Date(m.scheduledAt).toLocaleString();
 
     const homeGoals = m.goals
-        .filter((g) => (g.isOwnGoal ? g.teamId === m.awayTeamId : g.teamId === m.homeTeamId))
-        .map((g) => `<span>${g.minute}' ${g.scorer}${g.isOwnGoal ? ' (OG)' : ''}</span>`)
+        .filter((g) => g.teamId === m.homeTeamId)
+        .map((g) => `<span>${g.minute}' ${g.scorer}</span>`)
         .join('');
     const awayGoals = m.goals
-        .filter((g) => (g.isOwnGoal ? g.teamId === m.homeTeamId : g.teamId === m.awayTeamId))
-        .map((g) => `<span>${g.scorer}${g.isOwnGoal ? ' (OG)' : ''} ${g.minute}'</span>`)
+        .filter((g) => g.teamId === m.awayTeamId)
+        .map((g) => `<span>${g.scorer} ${g.minute}'</span>`)
         .join('');
     const goals = m.goals.length
         ? `<div class="goal-log">
@@ -290,9 +290,6 @@ function renderMatchCard(m) {
           </select>
           <input type="text" id="goal-scorer-${m.id}" placeholder="Scorer name" />
           <input type="number" id="goal-minute-${m.id}" placeholder="Minute" min="1" max="120" />
-          <label style="display:flex;align-items:center;gap:.3rem;font-size:.85rem;">
-            <input type="checkbox" id="goal-og-${m.id}" /> Own goal
-          </label>
           <button class="btn btn-green" onclick="doGoal('${m.id}')">Confirm</button>
           <button class="btn btn-gray" onclick="toggleGoalForm('${m.id}')">Cancel</button>
         </div>
@@ -387,14 +384,12 @@ async function doGoal(matchId) {
     const teamId  = document.getElementById(`goal-team-${matchId}`).value;
     const scorer  = document.getElementById(`goal-scorer-${matchId}`).value.trim();
     const minute  = document.getElementById(`goal-minute-${matchId}`).value;
-    const isOwnGoal = document.getElementById(`goal-og-${matchId}`).checked;
 
     try {
         const m = await api('POST', `/matches/${matchId}/goal`, {
             teamId,
             scorer: scorer || undefined,
             minute: minute ? Number(minute) : undefined,
-            isOwnGoal,
         });
         showAlert(`⚽ Goal! ${m.homeTeamName} ${m.homeScore}–${m.awayScore} ${m.awayTeamName}`);
         loadMatches();

@@ -199,7 +199,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Napredok\",\n    \"country\": \"Macedonia\"\n}",
+              "raw": "{\n    \"name\": \"Hajduk Split\",\n    \"country\": \"Croatia\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -227,7 +227,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/teams",
+              "raw": "http://localhost:3000/api/teams?country=Spain&page=1&limit=6",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -236,6 +236,29 @@
               "path": [
                 "api",
                 "teams"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Dinamo",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "country",
+                  "value": "Spain",
+                  "type": "text"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "limit",
+                  "value": "6",
+                  "type": "text"
+                }
               ]
             }
           },

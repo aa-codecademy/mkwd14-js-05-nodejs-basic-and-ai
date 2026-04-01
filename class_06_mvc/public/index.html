@@ -1,111 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Football League Tracker</title>
-  <link rel="stylesheet" href="/css/style.css" />
-</head>
-<body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Football League Tracker</title>
+		<link rel="stylesheet" href="/css/style.css" />
+	</head>
+	<body>
+		<header>
+			<span>⚽</span>
+			<h1>Football League Tracker</h1>
+		</header>
 
-<header>
-  <span>⚽</span>
-  <h1>Football League Tracker</h1>
-</header>
+		<div id="alert-box"></div>
 
-<div id="alert-box"></div>
+		<main>
+			<!-- TABS -->
+			<div class="tabs">
+				<button class="tab-btn active" data-tab="standings">
+					League Table
+				</button>
+				<button class="tab-btn" data-tab="matches">Matches</button>
+				<button class="tab-btn" data-tab="teams">Teams</button>
+			</div>
 
-<main>
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="standings">League Table</button>
-    <button class="tab-btn" data-tab="matches">Matches</button>
-    <button class="tab-btn" data-tab="teams">Teams</button>
-  </div>
+			<!-- ===== STANDINGS ===== -->
+			<div id="tab-standings" class="tab-panel active">
+				<div class="card">
+					<h2>League Table</h2>
+					<div id="standings-content"><p class="loading">Loading…</p></div>
+				</div>
+			</div>
 
-  <!-- ===== STANDINGS ===== -->
-  <div id="tab-standings" class="tab-panel active">
-    <div class="card">
-      <h2>League Table</h2>
-      <div id="standings-content"><p class="loading">Loading…</p></div>
-    </div>
-  </div>
+			<!-- ===== MATCHES ===== -->
+			<div id="tab-matches" class="tab-panel">
+				<!-- Schedule controls -->
+				<div class="card">
+					<h2>Schedule a Match</h2>
+					<div class="form-row">
+						<select id="home-team-select">
+							<option value="">Home team…</option>
+						</select>
+						<select id="away-team-select">
+							<option value="">Away team…</option>
+						</select>
+						<input type="datetime-local" id="match-date" />
+						<button class="btn btn-green" onclick="scheduleMatch()">
+							Schedule
+						</button>
+						<button class="btn btn-blue" onclick="scheduleRandom()">
+							🎲 Random
+						</button>
+					</div>
+				</div>
 
-  <!-- ===== MATCHES ===== -->
-  <div id="tab-matches" class="tab-panel">
+				<!-- Filter -->
+				<div class="card">
+					<h2>Match List</h2>
+					<div class="form-row" style="margin-bottom: 1rem">
+						<select id="match-filter" onchange="loadMatches()">
+							<option value="">All matches</option>
+							<option value="scheduled">Scheduled</option>
+							<option value="live">Live</option>
+							<option value="finished">Finished</option>
+							<option value="postponed">Postponed</option>
+						</select>
+						<button class="btn btn-gray" onclick="loadMatches()">
+							Refresh
+						</button>
+					</div>
+					<div id="match-list"><p class="loading">Loading…</p></div>
+				</div>
+			</div>
 
-    <!-- Schedule controls -->
-    <div class="card">
-      <h2>Schedule a Match</h2>
-      <div class="form-row">
-        <select id="home-team-select"><option value="">Home team…</option></select>
-        <select id="away-team-select"><option value="">Away team…</option></select>
-        <input type="datetime-local" id="match-date" />
-        <button class="btn btn-green" onclick="scheduleMatch()">Schedule</button>
-        <button class="btn btn-blue" onclick="scheduleRandom()">🎲 Random</button>
-      </div>
-    </div>
+			<!-- ===== TEAMS ===== -->
+			<div id="tab-teams" class="tab-panel">
+				<div class="card">
+					<h2>Add a New Team</h2>
+					<div class="form-row">
+						<input type="text" id="team-name" placeholder="Club name *" />
+						<input type="text" id="team-country" placeholder="Country *" />
+						<input type="text" id="team-stadium" placeholder="Stadium" />
+						<input
+							type="number"
+							id="team-founded"
+							placeholder="Founded"
+							min="1800"
+							max="2024" />
+						<button class="btn btn-green" onclick="createTeam()">
+							Add Team
+						</button>
+					</div>
+				</div>
+				<div class="card">
+					<h2>All Teams</h2>
+					<div class="teams-toolbar">
+						<input
+							type="text"
+							id="teams-q"
+							placeholder="Search name or country…"
+							oninput="onTeamSearch()" />
+						<select id="teams-country" onchange="loadTeams()">
+							<option value="">All countries</option>
+						</select>
+						<select id="teams-sort" onchange="loadTeams()">
+							<option value="points">Sort: Points</option>
+							<option value="name">Sort: Name</option>
+							<option value="wins">Sort: Wins</option>
+							<option value="goalDifference">Sort: Goal Diff</option>
+							<option value="goalsFor">Sort: Goals</option>
+							<option value="founded">Sort: Founded</option>
+						</select>
+						<select id="teams-order" onchange="loadTeams()">
+							<option value="desc">↓ Desc</option>
+							<option value="asc">↑ Asc</option>
+						</select>
+						<select id="teams-limit" onchange="loadTeams()">
+							<option value="3">3 / page</option>
+							<option value="6" selected>6 / page</option>
+							<option value="12">12 / page</option>
+						</select>
+					</div>
+					<div id="teams-content"><p class="loading">Loading…</p></div>
+					<div id="teams-pagination" class="pagination"></div>
+				</div>
+			</div>
+		</main>
 
-    <!-- Filter -->
-    <div class="card">
-      <h2>Match List</h2>
-      <div class="form-row" style="margin-bottom:1rem">
-        <select id="match-filter" onchange="loadMatches()">
-          <option value="">All matches</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="live">Live</option>
-          <option value="finished">Finished</option>
-          <option value="postponed">Postponed</option>
-        </select>
-        <button class="btn btn-gray" onclick="loadMatches()">Refresh</button>
-      </div>
-      <div id="match-list"><p class="loading">Loading…</p></div>
-    </div>
-  </div>
-
-  <!-- ===== TEAMS ===== -->
-  <div id="tab-teams" class="tab-panel">
-    <div class="card">
-      <h2>Add a New Team</h2>
-      <div class="form-row">
-        <input type="text" id="team-name" placeholder="Club name *" />
-        <input type="text" id="team-country" placeholder="Country *" />
-        <input type="text" id="team-stadium" placeholder="Stadium" />
-        <input type="number" id="team-founded" placeholder="Founded" min="1800" max="2024" />
-        <button class="btn btn-green" onclick="createTeam()">Add Team</button>
-      </div>
-    </div>
-    <div class="card">
-      <h2>All Teams</h2>
-      <div class="teams-toolbar">
-        <input type="text" id="teams-q" placeholder="Search name or country…" oninput="onTeamSearch()" />
-        <select id="teams-country" onchange="loadTeams()">
-          <option value="">All countries</option>
-        </select>
-        <select id="teams-sort" onchange="loadTeams()">
-          <option value="points">Sort: Points</option>
-          <option value="name">Sort: Name</option>
-          <option value="wins">Sort: Wins</option>
-          <option value="goalDifference">Sort: Goal Diff</option>
-          <option value="goalsFor">Sort: Goals</option>
-          <option value="founded">Sort: Founded</option>
-        </select>
-        <select id="teams-order" onchange="loadTeams()">
-          <option value="desc">↓ Desc</option>
-          <option value="asc">↑ Asc</option>
-        </select>
-        <select id="teams-limit" onchange="loadTeams()">
-          <option value="3">3 / page</option>
-          <option value="6" selected>6 / page</option>
-          <option value="12">12 / page</option>
-        </select>
-      </div>
-      <div id="teams-content"><p class="loading">Loading…</p></div>
-      <div id="teams-pagination" class="pagination"></div>
-    </div>
-  </div>
-</main>
-
-<script src="/js/main.js"></script>
-</body>
+		<script src="/js/main.js"></script>
+	</body>
 </html>
