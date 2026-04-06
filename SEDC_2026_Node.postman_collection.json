@@ -544,7 +544,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Go shopping\",\n    \"isCompleted\": false\n}",
+              "raw": "{\n    \"name\": \"1 dkjsah dkljadasdas\",\n    \"isCompleted\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -586,7 +586,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": ""
+                  "value": "69d3ed2754e974fe94a1e39e"
                 }
               ]
             }
@@ -600,7 +600,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Go shopping\",\n    \"isCompleted\": true\n}",
+              "raw": "{\n    \"name\": \"askdhjashdas\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -632,8 +632,27 @@
         {
           "name": "Delete reminder",
           "request": {
-            "method": "GET",
-            "header": []
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/reminders/:id",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "reminders",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "69d3dc9ba99740c61c236aca"
+                }
+              ]
+            }
           },
           "response": []
         }

@@ -1,6 +1,11 @@
 import express from 'express';
 import { connectToDb, getDb } from './db.js';
 import { ObjectId } from 'mongodb';
+import {
+	createReminderSchema,
+	updateReminderSchema,
+} from './schemas/reminder.schema.js';
+import { validateRequest } from './validate-request.js';
 
 /**
  * class_08_mongo/index.js
@@ -42,24 +47,34 @@ app.get('/api/reminders/:id', async (req, res) => {
 	res.json(reminder);
 });
 
-app.post('/api/reminders', async (req, res) => {
-	const body = req.body;
+app.post(
+	'/api/reminders',
+	validateRequest(createReminderSchema),
+	async (req, res) => {
+		const body = req.body;
 
-	const result = await getDb().collection('reminders').insertOne(body);
+		const result = await getDb().collection('reminders').insertOne(body);
 
-	res.status(201).json(result);
-});
+		res.status(201).json(result);
+	},
+);
 
-app.put('/api/reminders/:id', async (req, res) => {
-	const id = req.params;
-	const body = req.body;
+app.put(
+	'/api/reminders/:id',
+	validateRequest(updateReminderSchema),
+	async (req, res) => {
+		const id = req.params;
+		const body = req.body;
 
-	const result = await getDb()
-		.collection('reminders')
-		.updateOne({ _id: new ObjectId(id) }, { $set: body });
+		body.email = 'testing wrong db update';
 
-	res.json(result);
-});
+		const result = await getDb()
+			.collection('reminders')
+			.updateOne({ _id: new ObjectId(id) }, { $set: body });
+
+		res.json(result);
+	},
+);
 
 app.delete('/api/reminders/:id', async (req, res) => {
 	const { id } = req.params;
