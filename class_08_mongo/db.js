@@ -17,7 +17,7 @@ const MONGO_CLUSTER = "cluster0";
 const DB_NAME = "g2_test";
 
 // Mongo connection string for Atlas.
-// For this class demo it is intentionally simple/hardcoded.
+// In real projects, credentials should be loaded from environment variables.
 const client = new MongoClient(
   `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}.3y9yiup.mongodb.net/${DB_NAME}?appName=Cluster0`,
 );
@@ -26,7 +26,7 @@ let db = null;
 
 export async function connectToDb() {
   try {
-    // Connect once when server starts.
+    // Connect once when server starts so every route reuses the same client.
     const connection = await client.connect();
     // connection.db() returns the DB selected in the connection string.
     db = connection.db();
@@ -38,9 +38,9 @@ export async function connectToDb() {
 }
 
 export function getDb() {
-  // Any route that needs the DB imports and calls this function.
+  // Route handlers call this helper to access collections.
   if (!db) {
-    console.log("Database is not initialized. Initializing now...");
+    console.log("Database is not initialized. Did you call connectToDb()?");
   }
   return db;
 }
