@@ -40,9 +40,9 @@ export class MatchService {
 	}
 
 	async startMatch(id) {
-		const match = await this.getById(id);
+		const match = await Match.findById(id);
 
-		if (match.status !== MatchModel.STATUS.SCHEDULED) {
+		if (match.status !== MATCH_STATUSES.SCHEDULED) {
 			const err = new Error(
 				`Match with ID:${id} cannot be started because is currently: ${match.status}`,
 			);
@@ -50,18 +50,18 @@ export class MatchService {
 			throw err;
 		}
 
-		const updatedMatch = await Match.update(id, {
-			status: MatchModel.STATUS.LIVE,
-			startedAt: new Date().toISOString(),
-		});
+		match.status = MATCH_STATUSES.LIVE;
+		match.startedAt = new Date();
+
+		const updatedMatch = await match.save();
 
 		return updatedMatch;
 	}
 
 	async finishMatch(id) {
-		const match = await this.getById(id);
+		const match = await Match.findById(id);
 
-		if (match.status !== MatchModel.STATUS.LIVE) {
+		if (match.status !== MATCH_STATUSES.LIVE) {
 			const err = new Error(
 				`Match with ID:${id} cannot be finished because is currently: ${match.status}`,
 			);
@@ -69,18 +69,24 @@ export class MatchService {
 			throw err;
 		}
 
-		const updatedMatch = await Match.update(id, {
-			status: MatchModel.STATUS.FINISHED,
-			finishedAt: new Date().toISOString(),
-		});
+		match.status = MATCH_STATUSES.FINISHED;
+		match.finishedAt = new Date();
+		match.minute = 90;
+
+		const updatedMatch = await match.save();
+
+		await this.#updateStanding(updatedMatch);
 
 		return updatedMatch;
 	}
 
 	async postponeMatch(id) {
-		const match = await this.getById(id);
+		const match = await Match.findById(id);
 
-		if (match.status !== MatchModel.STATUS.SCHEDULED) {
+		if (
+			match.status === MATCH_STATUSES.LIVE ||
+			match.status === MATCH_STATUSES.FINISHED
+		) {
 			const err = new Error(
 				`Match with ID:${id} cannot be postponed because is currently: ${match.status}`,
 			);
@@ -88,50 +94,81 @@ export class MatchService {
 			throw err;
 		}
 
-		const updatedMatch = await Match.update(id, {
-			status: MatchModel.STATUS.POSTPONED,
-			postponedTo: new Date('2027-01-01').toISOString(),
-		});
+		match.status = MATCH_STATUSES.POSTPONED;
+		match.postponedTo = new Date('2027-01-01');
+
+		const updatedMatch = await match.save();
 
 		return updatedMatch;
 	}
 
 	async addGoal(matchId, { teamId, scorer, minute }) {
 		// Reuse getById() so we get a 404 automatically if match does not exist.
-		const match = await this.getById(matchId);
+		const match = await Match.findById(matchId);
 
 		// Goals are allowed only while the match is live.
-		if (match.status !== MatchModel.STATUS.LIVE) {
+		if (match.status !== MATCH_STATUSES.LIVE) {
 			const err = new Error('Match is not live.');
 			err.status = 400;
 			throw err;
 		}
 
 		// Safety check: goal can only be assigned to one of the two teams in this match.
-		if (teamId && teamId !== match.homeTeamId && teamId !== match.awayTeamId) {
+		if (
+			String(teamId) !== String(match.homeTeamId) &&
+			String(teamId) !== String(match.awayTeamId)
+		) {
 			const err = new Error('Team not involved in this match.');
 			err.status = 400;
 			throw err;
 		}
 
 		// Append a new goal event. This keeps a full event log, not only total score.
-		match.goals.push({ id: randomUUID(), teamId, scorer, minute });
+		match.goals.push({ teamId, scorer, minute });
 
 		// Update aggregate score based on which side scored.
-		if (teamId === match.homeTeamId) {
+		if (String(teamId) === String(match.homeTeamId)) {
 			match.homeScore += 1;
-		} else if (teamId === match.awayTeamId) {
+		} else if (String(teamId) === String(match.awayTeamId)) {
 			match.awayScore += 1;
 		}
 
-		// Persist only changed fields; Match.update handles merge with old record.
-		const updatedMatch = await Match.update(matchId, {
-			goals: match.goals,
-			homeScore: match.homeScore,
-			awayScore: match.awayScore,
-		});
+		const updatedMatch = await match.save();
 
 		return updatedMatch;
+	}
+
+	async #updateStanding({ homeTeamId, awayTeamId, homeScore, awayScore }) {
+		let homeResult = 'draw';
+		let awayResult = 'draw';
+
+		if (homeScore > awayScore) {
+			homeResult = 'win';
+			awayResult = 'loss';
+		} else if (homeScore < awayScore) {
+			homeResult = 'loss';
+			awayResult = 'win';
+		}
+
+		const homeTeam = await Team.findById(homeTeamId);
+		const awayTeam = await Team.findById(awayTeamId);
+
+		if (homeResult === 'win') homeTeam.wins += 1;
+		else if (homeResult === 'loss') homeTeam.losses += 1;
+		else homeTeam.draws += 1;
+
+		if (awayResult === 'win') awayTeam.wins += 1;
+		else if (awayResult === 'loss') awayTeam.losses += 1;
+		else awayTeam.draws += 1;
+
+		homeTeam.goalsFor += homeScore;
+		homeTeam.goalsAgainst += awayScore;
+
+		awayTeam.goalsFor += awayScore;
+		awayTeam.goalsAgainst += homeScore;
+
+		await homeTeam.save();
+		await awayTeam.save();
 	}
 
 	#serializeMatch(match) {

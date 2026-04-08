@@ -24,6 +24,7 @@
 import { Router } from 'express';
 import teamRouter from './team.routes.js';
 import matchRouter from './match.routes.js';
+import seedRouter from './seed.routes.js';
 
 // Express Router creates an isolated mini-application that handles its own
 // middleware and routes. It can be mounted on any path in the parent app.
@@ -35,5 +36,6 @@ router.use('/teams', teamRouter);
 // Mount the match resource router.
 // Any request to /api/matches/* is forwarded to matchRouter for further routing.
 router.use('/matches', matchRouter);
+router.use('/seed', seedRouter)
 
 export default router;
