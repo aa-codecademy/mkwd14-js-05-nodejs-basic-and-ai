@@ -1,26 +1,14 @@
-import { randomUUID } from 'crypto';
-import { Match, MatchModel } from '../models/match.model.js';
+import { Match, MATCH_STATUSES } from '../models/match.model.js';
 import { Team } from '../models/team.model.js';
 
 export class MatchService {
-	/**
-	 * Returns all matches, each enriched with homeTeamName and awayTeamName.
-	 *
-	 * Promise.all() runs all enrichment lookups in parallel rather than
-	 * sequentially, which is faster when there are many matches.
-	 */
 	async getAll() {
-		const matches = await Match.getAll();
-		return Promise.all(matches.map(match => this.#enrich(match)));
+		const matches = await Match.find().populate('homeTeamId awayTeamId').lean();
+		return matches.map(match => this.#serializeMatch(match));
 	}
 
-	/**
-	 * Fetches a single match by id and enriches it with team names.
-	 * Throws a 404 error if the match doesn't exist — same pattern as
-	 * TeamService.getTeamById.
-	 */
 	async getById(id) {
-		const match = await Match.getById(id);
+		const match = await Match.findById(id);
 
 		if (!match) {
 			const err = new Error(`Match with ID:${id} doesn't exist.`);
@@ -28,21 +16,12 @@ export class MatchService {
 			throw err;
 		}
 
-		return this.#enrich(match);
+		return match.toJSON();
 	}
 
-	/**
-	 * Creates a new match between two teams.
-	 *
-	 * CROSS-RESOURCE VALIDATION:
-	 * Before creating the match, we verify both team IDs actually exist.
-	 * This prevents orphaned matches that reference non-existent teams.
-	 * This check belongs in the Service (business rule), not the Controller
-	 * (which only checks request shape) or the Model (which only persists).
-	 */
 	async scheduleMatch(homeTeamId, awayTeamId, scheduledAt) {
-		const homeTeam = await Team.getById(homeTeamId);
-		const awayTeam = await Team.getById(awayTeamId);
+		const homeTeam = await Team.findById(homeTeamId);
+		const awayTeam = await Team.findById(awayTeamId);
 
 		if (!homeTeam) {
 			const err = new Error(`Home team doesn't exist.`);
@@ -55,20 +34,11 @@ export class MatchService {
 			throw err;
 		}
 
-		const match = await Match.create(homeTeamId, awayTeamId, scheduledAt);
+		const match = await Match.create({ homeTeamId, awayTeamId, scheduledAt });
 
-		return match;
+		return match.toJSON();
 	}
 
-	/**
-	 * STATE TRANSITION: scheduled → live
-	 *
-	 * Business rule: only matches with status "scheduled" can be started.
-	 * If the match is already live, finished, or postponed, the transition
-	 * is invalid and a 400 error is thrown.
-	 *
-	 * The startedAt timestamp records exactly when the match began.
-	 */
 	async startMatch(id) {
 		const match = await this.getById(id);
 
@@ -88,12 +58,6 @@ export class MatchService {
 		return updatedMatch;
 	}
 
-	/**
-	 * STATE TRANSITION: live → finished
-	 *
-	 * Business rule: only matches with status "live" can be finished.
-	 * The finishedAt timestamp records the full-time moment.
-	 */
 	async finishMatch(id) {
 		const match = await this.getById(id);
 
@@ -113,13 +77,6 @@ export class MatchService {
 		return updatedMatch;
 	}
 
-	/**
-	 * STATE TRANSITION: scheduled → postponed
-	 *
-	 * Business rule: only matches with status "scheduled" can be postponed.
-	 * Sets a placeholder postponedTo date — in a real app this would be
-	 * provided by the user or admin.
-	 */
 	async postponeMatch(id) {
 		const match = await this.getById(id);
 
@@ -177,31 +134,11 @@ export class MatchService {
 		return updatedMatch;
 	}
 
-	/**
-	 * PRIVATE HELPER — #enrich(match)
-	 * ---------------------------------
-	 * Joins match data with team data by looking up each team's name.
-	 *
-	 * This is essentially a manual database JOIN — matches store only
-	 * foreign keys (homeTeamId, awayTeamId) and this method resolves
-	 * them to human-readable team names for the API response.
-	 *
-	 * Promise.all() fetches both teams concurrently rather than one
-	 * after the other — a simple optimisation that halves the lookup time.
-	 *
-	 * The spread operator (...match) copies all existing match fields,
-	 * then the two new name fields are appended.
-	 */
-	async #enrich(match) {
-		const [homeTeam, awayTeam] = await Promise.all([
-			Team.getById(match.homeTeamId),
-			Team.getById(match.awayTeamId),
-		]);
-
+	#serializeMatch(match) {
 		return {
 			...match,
-			homeTeamName: homeTeam.name,
-			awayTeamName: awayTeam.name,
+			homeTeamName: match.homeTeamId.name,
+			awayTeamName: match.awayTeamId.name,
 		};
 	}
 }

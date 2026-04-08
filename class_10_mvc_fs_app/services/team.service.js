@@ -9,8 +9,8 @@ export class TeamService {
 		sortBy = 'name',
 		order = 'asc',
 	}) {
-		const teams = await Team.getAll();
-		let filteredTeams = [...teams].map(team => this.#enrich(team));
+		const teams = await Team.find();
+		let filteredTeams = [...teams];
 
 		// Apply filter only if present, otherwise return all teams. This allows for flexible querying without requiring all parameters.
 		if (q) {
@@ -56,63 +56,27 @@ export class TeamService {
 	 * - Sorting rules follow standard football league table conventions.
 	 */
 	async getLeagueTableStandings() {
-		const teams = await Team.getAll();
+		const teams = await Team.find();
 
-		return teams
-			.map(team => this.#enrich(team))
-			.sort(
-				(a, b) => b.points - a.points || b.goalDifference - a.goalDifference,
-			);
+		return teams.sort(
+			(a, b) => b.points - a.points || b.goalDifference - a.goalDifference,
+		);
 	}
 
-	/**
-	 * Fetches a single team by id and throws a descriptive error when not found.
-	 * Throwing here means the Controller's catch block handles the 404 case
-	 * without needing any extra if/else in the controller.
-	 */
 	async getTeamById(id) {
-		const team = await Team.getById(id);
+		const team = await Team.findById(id);
 
-		// Domain rule: requesting a non-existent team is an error condition,
-		// not just an empty result. Throw so the controller can map it to 404.
 		if (!team) {
 			throw new Error(`Team with id: ${id} not found.`);
 		}
 
-		return team;
-	}
-
-	/**
-	 * Delegates team creation to the model.
-	 * Business rule enforcement (duplicate name) lives in the Model's create()
-	 * method — the service simply passes the data through here.
-	 */
-	async createTeam(data) {
-		const team = await Team.create(data);
-		console.log('🚀 ivo-test ~ TeamService ~ createTeam ~ team:', team);
-
 		return team.toJSON();
 	}
 
-	/**
-	 * PRIVATE HELPER — #enrich(team)
-	 * --------------------------------
-	 * Computes and attaches derived statistics to a team object.
-	 * Using a private method (#) keeps the enrichment logic encapsulated and
-	 * reusable within this class without exposing it to callers.
-	 *
-	 * Football points formula: Win = 3pts, Draw = 1pt, Loss = 0pts.
-	 * Goal difference: goals scored minus goals conceded.
-	 *
-	 * The spread operator (...team) copies all existing team properties and
-	 * the two new computed fields are appended.
-	 */
-	#enrich(team) {
-		return {
-			...team,
-			points: team.wins * 3 + team.draws,
-			goalDifference: team.goalsFor - team.goalsAgainst,
-		};
+	async createTeam(data) {
+		const team = await Team.create(data);
+
+		return team.toJSON();
 	}
 }
 
