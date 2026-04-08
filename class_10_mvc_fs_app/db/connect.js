@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+// Build the MongoDB Atlas connection string from environment variables instead
+// of hardcoding credentials in the source code.
 function buildMongoURI() {
 	const { MONGO_USERNAME, MONGO_PASSWORD, MONGO_CLUSTER, DB_NAME } =
 		process.env;
@@ -29,6 +31,7 @@ function buildMongoURI() {
 export async function connectToDatabase() {
 	const mongoURI = buildMongoURI();
 
+	// Mongoose opens a single shared connection that all models reuse.
 	await mongoose.connect(mongoURI);
 	console.log(`MongoDB connected: ${mongoose.connection.name}`);
 }

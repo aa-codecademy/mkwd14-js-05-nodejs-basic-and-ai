@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+// Centralise allowed statuses in one place so the rest of the app does not
+// rely on scattered string literals like "live" or "finished".
 export const MATCH_STATUSES = {
 	SCHEDULED: 'scheduled',
 	LIVE: 'live',
@@ -7,6 +9,8 @@ export const MATCH_STATUSES = {
 	POSTPONED: 'postponed',
 };
 
+// Each goal is stored as a subdocument inside a match so we keep both the
+// running score and the timeline of who scored and when.
 const goalSchema = mongoose.Schema(
 	{
 		teamId: {
@@ -20,6 +24,8 @@ const goalSchema = mongoose.Schema(
 	{ id: false, versionKey: false },
 );
 
+// Match documents keep references to two Team documents plus live match data
+// such as score, minute, status, and goal history.
 const matchSchema = mongoose.Schema(
 	{
 		homeTeamId: {
@@ -52,5 +58,6 @@ const matchSchema = mongoose.Schema(
 	},
 );
 
+// Reuse the existing model if the file is reloaded during development.
 export const Match =
 	mongoose.models.Match || mongoose.model('Match', matchSchema);

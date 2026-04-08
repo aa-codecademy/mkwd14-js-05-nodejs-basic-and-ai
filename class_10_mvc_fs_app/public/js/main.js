@@ -1,5 +1,10 @@
 const BASE = '/api';
 
+// The frontend is intentionally lightweight: it only knows how to call the API,
+// render the returned JSON, and react to user interactions.
+
+// Tab switching controls which part of the SPA is visible and triggers the
+// initial data load for that tab.
 document.querySelectorAll('.tab-btn').forEach(btn => {
 	btn.addEventListener('click', () => {
 		document
@@ -33,6 +38,8 @@ function showAlert(msg, isError = false) {
 }
 
 async function api(method, path, body) {
+	// Keep all fetch boilerplate in one place so every UI action uses the same
+	// request/response flow.
 	const opts = {
 		method,
 		headers: { 'Content-Type': 'application/json' },
@@ -94,6 +101,7 @@ let teamsPage = 1;
 let teamsSearchTimer = null;
 
 function onTeamSearch() {
+	// Debounce the search input so we do not fire a request on every keystroke.
 	clearTimeout(teamsSearchTimer);
 	teamsSearchTimer = setTimeout(() => {
 		teamsPage = 1;
@@ -113,6 +121,8 @@ async function loadTeams() {
 	const order = document.getElementById('teams-order').value;
 	const limit = document.getElementById('teams-limit').value;
 
+	// URLSearchParams helps us build clean query strings for filtering, sorting
+	// and pagination.
 	const params = new URLSearchParams({ sortBy, order, page: teamsPage, limit });
 	if (q) params.set('q', q);
 	if (country) params.set('country', country);
@@ -180,6 +190,7 @@ function gotoPage(p) {
 
 async function populateCountryFilter() {
 	try {
+		// Reuse the teams API instead of maintaining a separate countries endpoint.
 		const { data: teams } = await api('GET', '/teams?limit=50');
 		const countries = [...new Set(teams.map(t => t.country))].sort();
 		const sel = document.getElementById('teams-country');
@@ -208,6 +219,7 @@ async function createTeam() {
 			founded: founded ? Number(founded) : undefined,
 		});
 		showAlert(`${name} added!`);
+		// Clear the form and refresh all UI areas that depend on team data.
 		['team-name', 'team-country', 'team-stadium', 'team-founded'].forEach(
 			id => {
 				document.getElementById(id).value = '';
@@ -249,6 +261,7 @@ async function loadMatches() {
 			return;
 		}
 
+		// Show the newest scheduled matches first.
 		matches.sort((a, b) => new Date(b.scheduledAt) - new Date(a.scheduledAt));
 		el.innerHTML = `<div class="match-list">${matches.map(renderMatchCard).join('')}</div>`;
 	} catch (e) {
@@ -260,6 +273,8 @@ function renderMatchCard(m) {
 	const statusBadge = `<span class="match-status status-${m.status}">${m.status}</span>`;
 	const dateStr = new Date(m.scheduledAt).toLocaleString();
 
+	// Split the goal log into a left column for the home side and a right column
+	// for the away side.
 	const homeGoals = m.goals
 		.filter(g => g.teamId === m.homeTeamId)
 		.map(g => `<span>${g.minute}' ${g.scorer}</span>`)
@@ -419,5 +434,7 @@ async function doGoal(matchId) {
 	}
 }
 
+// Initial page load: render the default standings tab and preload team options
+// used by the match scheduling form.
 loadStandings();
 loadTeamSelects();

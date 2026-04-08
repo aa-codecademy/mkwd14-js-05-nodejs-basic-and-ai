@@ -1,6 +1,6 @@
-# MVC Pattern in Node.js & Express
+# MVC Pattern in Node.js, Express, MongoDB, and Mongoose
 
-A football league management API built with Node.js and Express to demonstrate the **Model-View-Controller (MVC)** architectural pattern. This project is a teaching example — every file is heavily commented to explain how and why each layer exists.
+A football league management API built with Node.js and Express to demonstrate the **Model-View-Controller (MVC)** architectural pattern. The current version uses **MongoDB** for storage and **Mongoose** as the ODM, and the codebase is documented so students can follow how data moves through each layer.
 
 ---
 
@@ -14,7 +14,7 @@ A football league management API built with Node.js and Express to demonstrate t
    - [Controller](#controller-the-bridge)
    - [Service](#service-the-brain)
    - [Model](#model-the-gatekeeper)
-   - [DbService](#dbservice-the-storage-driver)
+   - [Database Connection](#database-connection)
    - [Middleware](#middleware-cross-cutting-concerns)
    - [View](#view-the-frontend)
 4. [Request Lifecycle](#request-lifecycle)
@@ -25,6 +25,9 @@ A football league management API built with Node.js and Express to demonstrate t
    - [Teams](#teams-endpoints)
    - [Matches](#matches-endpoints)
 9. [Setup & Running](#setup--running)
+   - [How `.env` works](#how-env-works)
+   - [MongoDB Atlas setup](#mongodb-atlas-setup)
+   - [Seeding demo data](#seeding-demo-data)
 
 ---
 
@@ -34,7 +37,7 @@ A football league management API built with Node.js and Express to demonstrate t
 
 | Layer          | Responsibility        | Knows About                               |
 | -------------- | --------------------- | ----------------------------------------- |
-| **Model**      | Data access & storage | Database / file system only               |
+| **Model**      | Data access & storage | Database access, schemas, validation      |
 | **View**       | Presentation / UI     | How data looks to the user                |
 | **Controller** | Coordination          | HTTP request/response, delegates to Model |
 
@@ -44,7 +47,7 @@ The fundamental rule is **Separation of Concerns** — each layer has one job an
 
 - **Maintainability** — a bug in data access is always in the Model; a display bug is always in the View.
 - **Testability** — each layer can be tested in isolation without the others.
-- **Scalability** — layers can be replaced independently (e.g. swap a JSON file for a real database without touching the Controller or View).
+- **Scalability** — layers can evolve independently (e.g. you can refactor database queries in the Model without changing the Controller or View).
 - **Readability** — any developer familiar with MVC immediately knows where to look for any piece of logic.
 
 ### MVC in a REST API context
@@ -102,21 +105,21 @@ REST API MVC:  Browser ← JSON ← Controller ← Model ← Database
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     MODEL  (models/)                                │
 │         team.model.js  /  match.model.js                           │
-│  Data access: getAll, getById, create, update. Data integrity      │
+│  Mongoose schemas, validation, virtual fields, MongoDB access      │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                  DB SERVICE  (services/)                            │
-│                  services/db.service.js                            │
-│       Generic JSON file reader/writer (swap for real DB here)      │
+│                 DATABASE CONNECTION (db/)                           │
+│                     db/connect.js                                   │
+│       Builds MongoDB URI from env vars and opens Mongoose connection│
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     DATA  (data/)                                   │
-│               data/teams.json / data/matches.json                  │
-│                  (Flat-file "database")                            │
+│                    MONGODB DATABASE                                 │
+│            teams collection / matches collection                    │
+│                Persisted in MongoDB Atlas or local MongoDB          │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -243,40 +246,42 @@ The `#enrich()` private method is used in both services — it is the single sou
 
 The Model is the **only layer that talks to storage**. It:
 
-- Provides a semantic API (`getAll`, `getById`, `create`, `update`) over raw file I/O.
-- Defines the **shape** of a record (team or match).
-- Enforces **data-integrity rules** (e.g. no duplicate team names, default values for optional fields, UUID generation).
+- Defines the **shape** of a MongoDB document through a Mongoose schema.
+- Enforces **data-integrity rules** such as required fields, uniqueness, enums, and numeric limits.
+- Exposes document behavior such as virtual fields (`points`, `goalDifference`) and references between collections.
 
 ```
 Model knows:    the structure of data, storage operations, data constraints
 Model avoids:   business rules like point calculations, HTTP concerns
 ```
 
-Private fields (`#db`, `#read`, `#write`) ensure that nothing outside the class can bypass the model's validation logic and write directly to the file.
+In this version, the model is implemented with **Mongoose**, so storage access happens through methods like `find()`, `findById()`, `create()`, `save()`, and `populate()`.
 
 **Match model specifics:**
 
-- Uses a **static `STATUS` enum** to define valid match statuses — avoids magic strings throughout the codebase.
-- The `update()` method implements a **read-modify-write** pattern for partial updates: spread the existing record, then overwrite only the provided fields.
-
-> **Swapping storage later:** because all I/O is isolated here (and in DbService), replacing JSON files with a real database (MongoDB, PostgreSQL) only requires changing the Model — the Service and Controller are untouched.
+- Uses a shared `MATCH_STATUSES` constant to define valid lifecycle states.
+- Stores `homeTeamId` and `awayTeamId` as **references** to `Team` documents.
+- Stores each goal as a nested subdocument so one match document contains both the score and the scoring timeline.
 
 ---
 
-### DbService — The Storage Driver
+### Database Connection
 
-**File:** `services/db.service.js`
+**File:** `db/connect.js`
 
-A generic utility class that reads and writes JSON files. It is not MVC-specific — it is a reusable infrastructure component.
-
-Each model creates its own instance bound to a specific file:
+The database connection is created once during application startup:
 
 ```js
-new DbService("teams.json"); // → data/teams.json
-new DbService("matches.json"); // → data/matches.json
+await connectToDatabase();
 ```
 
-In a real application this is replaced by a database ORM (e.g. Mongoose, Prisma, Drizzle). The interface (`read()` / `write()`) stays the same, making the swap transparent to the Model.
+`db/connect.js`:
+
+- Reads the MongoDB credentials from environment variables.
+- Builds the full `mongodb+srv://...` connection string.
+- Calls `mongoose.connect(...)` before Express starts listening.
+
+This startup order matters: if the app accepted HTTP requests before the database connection was ready, route handlers could fail on the first incoming requests.
 
 ---
 
@@ -350,17 +355,16 @@ Tracing `GET /api/teams/standings` through every layer:
    └─ calls teamService.getLeagueTableStandings()
 
 6. services/team.service.js → getLeagueTableStandings()
-   └─ calls Team.getAll() (the model)
-   └─ enriches each team with points + goalDifference
+   └─ calls Team.find() through Mongoose
+   └─ receives Team documents with virtuals such as points + goalDifference
    └─ sorts by points desc, then goalDifference desc
    └─ returns enriched, sorted array
 
-7. models/team.model.js → getAll()
-   └─ calls this.#read() → DbService.read()
+7. models/team.model.js
+   └─ Mongoose maps the query to the MongoDB `teams` collection
 
-8. services/db.service.js → read()
-   └─ reads data/teams.json from disk
-   └─ parses JSON → returns array
+8. MongoDB
+   └─ returns the matching team documents to Mongoose
 
 9. Response flows back up:
    Model → Service → Controller → res.json(teams) → Browser
@@ -384,11 +388,10 @@ Browser  →  POST /api/teams  { name, country, stadium, founded }
          Service  →  teamService.createTeam(data)
               ↓
          Model  →  Team.create(data)
-                   ├─ reads all teams (checks for duplicate name)
-                   ├─ generates UUID
-                   ├─ builds team object with defaults
-                   ├─ pushes to array
-                   └─ writes updated array to teams.json
+                   ├─ validates required fields and schema rules
+                   ├─ applies defaults defined in the schema
+                   ├─ MongoDB generates the `_id`
+                   └─ inserts the new document in the `teams` collection
               ↓
          Controller  →  res.status(201).json(newTeam)
               ↓
@@ -442,31 +445,35 @@ This is a classic example of a **state machine** in a backend API — a common p
 class_06_mvc/
 │
 ├── index.js                    ← App entry point, bootstrapper
+├── db/
+│   └── connect.js              ← Builds the MongoDB URI and starts Mongoose
 │
 ├── routes/
 │   ├── index.js                ← Root API router (/api)
 │   ├── team.routes.js          ← Team resource endpoints (/api/teams)
-│   └── match.routes.js         ← Match resource endpoints (/api/matches)
+│   ├── match.routes.js         ← Match resource endpoints (/api/matches)
+│   └── seed.routes.js          ← Demo data seed endpoint (/api/seed)
 │
 ├── controllers/
 │   ├── team.controller.js      ← HTTP ↔ Service bridge for teams (C in MVC)
-│   └── match.controller.js     ← HTTP ↔ Service bridge for matches
+│   ├── match.controller.js     ← HTTP ↔ Service bridge for matches
+│   └── seed.controller.js      ← HTTP ↔ Service bridge for seeding
 │
 ├── services/
 │   ├── team.service.js         ← Business logic for teams
 │   ├── match.service.js        ← Business logic for matches (state machine)
-│   └── db.service.js           ← Generic JSON file persistence
+│   ├── seed.service.js         ← Inserts demo teams into MongoDB
+│   └── db.service.js           ← Legacy JSON persistence example (not used now)
 │
 ├── models/
-│   ├── team.model.js           ← Data access + integrity for teams (M in MVC)
-│   └── match.model.js          ← Data access + integrity for matches
+│   ├── team.model.js           ← Team schema + validation + virtuals
+│   └── match.model.js          ← Match schema + references + status enum
 │
 ├── middleware/
 │   └── error-handler.js        ← Centralised error formatting
 │
 ├── data/
-│   ├── teams.json              ← Team records (flat-file DB)
-│   └── matches.json            ← Match records (flat-file DB)
+│   └── teams.js                ← Demo team data used by the seed route
 │
 ├── public/                     ← SPA served by express.static (V in MVC)
 │   ├── index.html
@@ -583,6 +590,9 @@ Standings response additionally includes:
 # Install dependencies
 npm install
 
+# Create a local env file from the example
+cp .env.example .env
+
 # Start in development mode (auto-restart on file change)
 npm run dev
 
@@ -594,18 +604,79 @@ Open [http://localhost:3000](http://localhost:3000) to view the frontend.
 
 The API is available at [http://localhost:3000/api](http://localhost:3000/api).
 
+### How `.env` works
+
+The app loads environment variables at startup through:
+
+```js
+import 'dotenv/config';
+```
+
+That line tells `dotenv` to read the `.env` file and attach the values to `process.env`, which is why files like `index.js` and `db/connect.js` can use:
+
+```js
+process.env.PORT
+process.env.MONGO_USERNAME
+```
+
+The required variables are:
+
+- `MONGO_USERNAME` — your MongoDB Atlas database username.
+- `MONGO_PASSWORD` — your MongoDB Atlas database user password.
+- `MONGO_CLUSTER` — the Atlas cluster host, for example `cluster0.xxxxx.mongodb.net`.
+- `DB_NAME` — the database name to connect to.
+- `PORT` — the port Express listens on.
+- `HOSTNAME` — the hostname Express binds to, usually `localhost`.
+
+### MongoDB Atlas setup
+
+1. Create a MongoDB Atlas cluster if you do not already have one.
+2. In Atlas, create a **database user** with a username and password.
+3. In **Network Access**, allow your current IP address.
+4. Copy `.env.example` to `.env`.
+5. Fill the `.env` values with your own Atlas credentials.
+
+Example:
+
+```env
+MONGO_USERNAME="myUser"
+MONGO_PASSWORD="myStrongPassword"
+MONGO_CLUSTER="cluster0.xxxxx.mongodb.net"
+DB_NAME="football"
+PORT=3000
+HOSTNAME="localhost"
+```
+
+When the app starts, `db/connect.js` builds this kind of URI:
+
+```txt
+mongodb+srv://<username>:<password>@<cluster>/<db-name>?retryWrites=true&w=majority&appName=FootballLeagueTracker
+```
+
+Then it calls `mongoose.connect(...)` before the server starts listening for requests.
+
+### Seeding demo data
+
+After the server starts successfully, you can populate the database with the demo teams:
+
+```bash
+curl -X POST http://localhost:3000/api/seed
+```
+
+That route clears the existing `teams` collection and inserts the predefined teams from `data/teams.js`.
+
 ---
 
 ## Key Takeaways
 
-1. **Each layer has one responsibility** — the Controller never touches the file system; the Model never knows about HTTP status codes.
+1. **Each layer has one responsibility** — the Controller never touches MongoDB directly; the Model never knows about HTTP status codes.
 2. **Data flows in one direction** — Request → Routes → Controller → Service → Model → Storage → back up the chain as a Response.
 3. **Errors propagate via `next(error)`** — no try/catch spaghetti; all errors are handled in one place.
 4. **Services are the right place for business logic** — not Controllers, not Models.
 5. **Models are the only door to your data** — everything else asks the Model; nothing bypasses it.
 6. **State machines belong in the Service layer** — the match lifecycle (scheduled → live → finished) is a domain rule, enforced by the service, not the controller or model.
 7. **Data enrichment (JOINs) belong in the Service layer** — when one resource needs data from another (match needs team names), the service performs the lookup.
-8. **Static properties as enums** — `MatchModel.STATUS` centralises allowed status values, preventing typos and magic strings.
+8. **Centralised status constants prevent magic strings** — `MATCH_STATUSES` keeps the allowed match states in one place.
 
 ---
 

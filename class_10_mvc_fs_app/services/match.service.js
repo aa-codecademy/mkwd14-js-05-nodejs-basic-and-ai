@@ -1,8 +1,12 @@
 import { Match, MATCH_STATUSES } from '../models/match.model.js';
 import { Team } from '../models/team.model.js';
 
+// The service layer owns domain rules. Here that mainly means match lifecycle
+// transitions plus the side effects of finishing a match and updating standings.
 export class MatchService {
 	async getAll() {
+		// populate() replaces the stored ObjectId values with the actual Team
+		// documents so the frontend can display team names without extra requests.
 		const matches = await Match.find().populate('homeTeamId awayTeamId').lean();
 		return matches.map(match => this.#serializeMatch(match));
 	}
@@ -20,6 +24,7 @@ export class MatchService {
 	}
 
 	async scheduleMatch(homeTeamId, awayTeamId, scheduledAt) {
+		// Validate cross-document references before creating the match.
 		const homeTeam = await Team.findById(homeTeamId);
 		const awayTeam = await Team.findById(awayTeamId);
 
@@ -75,6 +80,8 @@ export class MatchService {
 
 		const updatedMatch = await match.save();
 
+		// Finishing a match has a business side effect: team statistics must be
+		// updated so the standings table reflects the final score.
 		await this.#updateStanding(updatedMatch);
 
 		return updatedMatch;
@@ -139,6 +146,7 @@ export class MatchService {
 	}
 
 	async #updateStanding({ homeTeamId, awayTeamId, homeScore, awayScore }) {
+		// Convert the final score into win/draw/loss outcomes for both teams.
 		let homeResult = 'draw';
 		let awayResult = 'draw';
 
@@ -153,6 +161,7 @@ export class MatchService {
 		const homeTeam = await Team.findById(homeTeamId);
 		const awayTeam = await Team.findById(awayTeamId);
 
+		// Update match outcome counters.
 		if (homeResult === 'win') homeTeam.wins += 1;
 		else if (homeResult === 'loss') homeTeam.losses += 1;
 		else homeTeam.draws += 1;
@@ -161,6 +170,7 @@ export class MatchService {
 		else if (awayResult === 'loss') awayTeam.losses += 1;
 		else awayTeam.draws += 1;
 
+		// Goals for / against are stored totals used by the standings table.
 		homeTeam.goalsFor += homeScore;
 		homeTeam.goalsAgainst += awayScore;
 
@@ -172,6 +182,8 @@ export class MatchService {
 	}
 
 	#serializeMatch(match) {
+		// Keep the API response frontend-friendly by exposing team names next to
+		// the referenced ids.
 		return {
 			...match,
 			homeTeamName: match.homeTeamId.name,
